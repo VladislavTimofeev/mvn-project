@@ -1,6 +1,8 @@
 package com.vlad.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,13 +26,16 @@ public class Request {
     private Long id;
 
     private Long customerId;
+
+    @Enumerated(EnumType.STRING)
     private RequestStatus status;
+
     private String cargoDetails;
     private BigDecimal weight;
     private Integer palletCount;
     private Boolean refrigerated;
     private String pickupAddress;
     private String deliveryAddress;
-    private LocalDate creation_date;
-    private Integer carrierId;
+    private LocalDate creationDate;
+    private Long carrierId;
 }

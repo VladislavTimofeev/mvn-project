@@ -21,7 +21,7 @@ public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer carrierId;
+    private Long carrierId;
     private String licensePlate;
     private BigDecimal capacity;
     private Integer palletCapacity;

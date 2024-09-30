@@ -21,9 +21,9 @@ public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer requestId;
-    private Integer vehicleId;
-    private Integer driverId;
+    private Long requestId;
+    private Long vehicleId;
+    private Long driverId;
     private LocalDate departureTime;
     private LocalDate arrivalTime;
     private TripStatus status;
