@@ -11,7 +11,7 @@ CREATE TABLE users
 );
 
 -- Таблица заявок
-CREATE TABLE requests
+CREATE TABLE request
 (
     id               SERIAL PRIMARY KEY,
     customer_id      BIGINT         NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE requests
 );
 
 -- Таблица транспорта
-CREATE TABLE vehicles
+CREATE TABLE vehicle
 (
     id              SERIAL PRIMARY KEY,
     carrier_id      BIGINT         NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE vehicles
 );
 
 -- Таблица водителей
-CREATE TABLE drivers
+CREATE TABLE driver
 (
     id             SERIAL PRIMARY KEY,
     carrier_id     BIGINT       NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE drivers
 );
 
 -- Таблица рейсов
-CREATE TABLE trips
+CREATE TABLE trip
 (
     id             SERIAL PRIMARY KEY,
     request_id     BIGINT      NOT NULL,
