@@ -9,11 +9,15 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"name", "licenseNumber", "phoneNumber"})
+@ToString(of = {"name", "licenseNumber", "phoneNumber"})
 @Builder
 @Entity
 public class Driver {
@@ -24,7 +28,7 @@ public class Driver {
 
     @ManyToOne
     @JoinColumn(name = "carrier_id")
-    private User carrierId;
+    private User carrier;
 
     private String name;
     private String licenseNumber;

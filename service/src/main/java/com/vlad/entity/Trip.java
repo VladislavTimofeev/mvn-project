@@ -1,5 +1,6 @@
 package com.vlad.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,13 +12,17 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"departureTime", "arrivalTime"})
+@ToString(of = {"departureTime", "arrivalTime"})
 @Builder
 @Entity
 public class Trip {
@@ -26,17 +31,17 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "request_id")
-    private Request requestId;
+    private Request request;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "vehicle_id")
-    private Vehicle vehicleId;
+    private Vehicle vehicle;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "driver_id")
-    private Driver driverId;
+    private Driver driver;
 
     private LocalDate departureTime;
     private LocalDate arrivalTime;

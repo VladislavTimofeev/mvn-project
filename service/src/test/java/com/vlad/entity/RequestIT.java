@@ -1,44 +1,25 @@
 package com.vlad.entity;
 
-import com.vlad.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.vlad.TestBase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
-class RequestIT {
-
-    private static SessionFactory sessionFactory;
-    private Session session;
-
-    @BeforeAll
-    static void createSessionFactory() {
-        sessionFactory = HibernateUtil.buildSessionFactory();
-    }
-
-    @BeforeEach
-    void openSession() {
-        session = sessionFactory.openSession();
-        session.beginTransaction();
-    }
+class RequestIT extends TestBase {
 
     @Test
     void deleteRequest() {
         User customer = getCustomer();
+        session.persist(customer);
         User carrier = getCarrier();
+        session.persist(carrier);
         Request request = Request.builder()
-                .customerId(customer)
+                .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
                 .weight(BigDecimal.valueOf(100.59))
@@ -47,21 +28,26 @@ class RequestIT {
                 .pickupAddress("Selitskogo 21")
                 .deliveryAddress("Matusevicha 39")
                 .creationDate(LocalDate.now())
-                .carrierId(carrier)
+                .carrier(carrier)
                 .build();
         session.persist(request);
         session.remove(request);
+        session.flush();
+        session.clear();
 
         Request actualResult = session.get(Request.class, request.getId());
+
         assertNull(actualResult);
     }
 
     @Test
     void updateRequest() {
         User customer = getCustomer();
+        session.persist(customer);
         User carrier = getCarrier();
+        session.persist(carrier);
         Request request = Request.builder()
-                .customerId(customer)
+                .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
                 .weight(BigDecimal.valueOf(100.59))
@@ -70,23 +56,28 @@ class RequestIT {
                 .pickupAddress("Selitskogo 21")
                 .deliveryAddress("Matusevicha 39")
                 .creationDate(LocalDate.now())
-                .carrierId(carrier)
+                .carrier(carrier)
                 .build();
         session.persist(request);
         request.setStatus(RequestStatus.IN_PROGRESS);
         session.merge(request);
+        session.flush();
+        session.clear();
 
         Request actualResult = session.get(Request.class, request.getId());
+
         assertEquals(RequestStatus.IN_PROGRESS, actualResult.getStatus());
 
     }
 
     @Test
-    void getRequest(){
+    void getRequest() {
         User customer = getCustomer();
+        session.persist(customer);
         User carrier = getCarrier();
+        session.persist(carrier);
         Request request = Request.builder()
-                .customerId(customer)
+                .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
                 .weight(BigDecimal.valueOf(100.59))
@@ -95,22 +86,26 @@ class RequestIT {
                 .pickupAddress("Selitskogo 21")
                 .deliveryAddress("Matusevicha 39")
                 .creationDate(LocalDate.now())
-                .carrierId(carrier)
+                .carrier(carrier)
                 .build();
         session.persist(request);
+        session.flush();
+        session.clear();
 
         Request actualResult = session.get(Request.class, request.getId());
 
-        assertEquals(request.getId(), actualResult.getId());
+        assertEquals(request, actualResult);
 
     }
 
     @Test
     void createRequest() {
         User customer = getCustomer();
+        session.persist(customer);
         User carrier = getCarrier();
+        session.persist(carrier);
         Request request = Request.builder()
-                .customerId(customer)
+                .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
                 .weight(BigDecimal.valueOf(100.59))
@@ -119,11 +114,15 @@ class RequestIT {
                 .pickupAddress("Selitskogo 21")
                 .deliveryAddress("Matusevicha 39")
                 .creationDate(LocalDate.now())
-                .carrierId(carrier)
+                .carrier(carrier)
                 .build();
         session.persist(request);
+        session.flush();
+        session.clear();
 
-        assertNotNull(request.getId());
+        Request actualResult = session.get(Request.class, request.getId());
+
+        assertEquals(request, actualResult);
     }
 
     private static User getCarrier() {
@@ -146,17 +145,6 @@ class RequestIT {
                 .contactInfo("vika@example.com")
                 .address("Mazurova 4")
                 .build();
-    }
-
-    @AfterEach
-    void closeSession() {
-        session.getTransaction().rollback();
-        session.close();
-    }
-
-    @AfterAll
-    static void closeSessionFactory() {
-        sessionFactory.close();
     }
 
 }

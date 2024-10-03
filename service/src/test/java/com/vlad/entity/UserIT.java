@@ -1,36 +1,15 @@
 package com.vlad.entity;
 
-import com.vlad.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.vlad.TestBase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class UserIT {
-
-    private static SessionFactory sessionFactory;
-    private Session session;
-
-    @BeforeAll
-    static void createSessionFactory() {
-        sessionFactory = HibernateUtil.buildSessionFactory();
-    }
-
-    @BeforeEach
-    void openSession(){
-        session = sessionFactory.openSession();
-        session.beginTransaction();
-    }
+class UserIT extends TestBase {
 
     @Test
-    void deleteUser(){
+    void deleteUser() {
         User user = User.builder()
                 .username("MickyMouse")
                 .password("1234567")
@@ -39,17 +18,19 @@ class UserIT {
                 .contactInfo("vika@example.com")
                 .address("Mazurova 4")
                 .build();
-
         session.persist(user);
         session.remove(user);
+        session.flush();
+        session.clear();
 
         User actualResult = session.get(User.class, user.getId());
+
         assertNull(actualResult);
 
     }
 
     @Test
-    void updateUser(){
+    void updateUser() {
         User user = User.builder()
                 .username("MickyMouse")
                 .password("1234567")
@@ -58,17 +39,20 @@ class UserIT {
                 .contactInfo("vika@example.com")
                 .address("Mazurova 4")
                 .build();
-
         session.persist(user);
         user.setName("ViktoriaPobeditelnica");
         session.merge(user);
+        session.flush();
+        session.clear();
 
         User actualResult = session.get(User.class, user.getId());
+
         assertEquals("ViktoriaPobeditelnica", actualResult.getName());
+
     }
 
     @Test
-    void getUser(){
+    void getUser() {
         User user = User.builder()
                 .username("MickyMouse")
                 .password("1234567")
@@ -77,11 +61,13 @@ class UserIT {
                 .contactInfo("vika@example.com")
                 .address("Mazurova 4")
                 .build();
-
         session.persist(user);
+        session.flush();
+        session.clear();
+
         User actualResult = session.get(User.class, user.getId());
 
-        assertEquals(user.getUsername(), actualResult.getUsername());
+        assertEquals(user, actualResult);
     }
 
     @Test
@@ -94,21 +80,13 @@ class UserIT {
                 .contactInfo("vika@example.com")
                 .address("Mazurova 4")
                 .build();
-
         session.persist(user);
+        session.flush();
+        session.clear();
 
-        assertNotNull(user.getId());
-    }
+        User actualResult = session.get(User.class, user.getId());
 
-    @AfterEach
-    void closeSession(){
-        session.getTransaction().rollback();
-        session.close();
-    }
-
-    @AfterAll
-    static void closeSessionFactory(){
-        sessionFactory.close();
+        assertEquals(user, actualResult);
     }
 
 }
