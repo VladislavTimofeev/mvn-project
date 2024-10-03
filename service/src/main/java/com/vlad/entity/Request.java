@@ -6,6 +6,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +27,9 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long customerId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private User customerId;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
@@ -37,5 +41,8 @@ public class Request {
     private String pickupAddress;
     private String deliveryAddress;
     private LocalDate creationDate;
-    private Long carrierId;
+
+    @ManyToOne
+    @JoinColumn(name = "carrier_id")
+    private User carrierId;
 }
