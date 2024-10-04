@@ -1,6 +1,6 @@
 package com.vlad;
 
-import com.vlad.util.HibernateUtil;
+import com.vlad.util.HibernateTestUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -15,7 +15,12 @@ public abstract class TestBase {
 
     @BeforeAll
     static void createSessionFactory() {
-        sessionFactory = HibernateUtil.buildSessionFactory();
+        sessionFactory = HibernateTestUtil.buildSessionFactory();
+    }
+
+    @AfterAll
+    static void closeSessionFactory() {
+        sessionFactory.close();
     }
 
     @BeforeEach
@@ -30,8 +35,4 @@ public abstract class TestBase {
         session.close();
     }
 
-    @AfterAll
-    static void closeSessionFactory() {
-        sessionFactory.close();
-    }
 }
