@@ -1,109 +1,101 @@
 package com.vlad.entity;
 
-import com.vlad.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.vlad.TestBase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
-class VehicleIT {
-
-    private static SessionFactory sessionFactory;
-    private Session session;
-
-    @BeforeAll
-    static void createSessionFactory() {
-        sessionFactory = HibernateUtil.buildSessionFactory();
-    }
-
-    @BeforeEach
-    void openSession() {
-        session = sessionFactory.openSession();
-        session.beginTransaction();
-    }
+class VehicleIT extends TestBase {
 
     @Test
     void deleteVehicle() {
         User carrier = getCarrier();
+        session.persist(carrier);
         Vehicle vehicle = Vehicle.builder()
-                .carrierId(carrier)
+                .carrier(carrier)
                 .licensePlate("1234")
                 .capacity(BigDecimal.valueOf(25.9))
                 .palletCapacity(18)
                 .refrigerated(false)
                 .model("ISUZU")
                 .build();
-
         session.persist(vehicle);
         session.remove(vehicle);
+        session.flush();
+        session.clear();
 
         Vehicle actualResult = session.get(Vehicle.class, vehicle.getId());
+
         assertNull(actualResult);
     }
 
     @Test
     void updateVehicle() {
         User carrier = getCarrier();
+        session.persist(carrier);
         Vehicle vehicle = Vehicle.builder()
-                .carrierId(carrier)
+                .carrier(carrier)
                 .licensePlate("1234")
                 .capacity(BigDecimal.valueOf(25.9))
                 .palletCapacity(18)
                 .refrigerated(false)
                 .model("ISUZU")
                 .build();
-
         session.persist(vehicle);
         vehicle.setLicensePlate("9999");
         session.merge(vehicle);
+        session.flush();
+        session.clear();
 
         Vehicle actualResult = session.get(Vehicle.class, vehicle.getId());
+
         assertEquals("9999", actualResult.getLicensePlate());
     }
 
     @Test
     void getVehicle() {
         User carrier = getCarrier();
+        session.persist(carrier);
         Vehicle vehicle = Vehicle.builder()
-                .carrierId(carrier)
+                .carrier(carrier)
                 .licensePlate("1234")
                 .capacity(BigDecimal.valueOf(25.9))
                 .palletCapacity(18)
                 .refrigerated(false)
                 .model("ISUZU")
                 .build();
-
         session.persist(vehicle);
+        session.flush();
+        session.clear();
+
         Vehicle actualResult = session.get(Vehicle.class, vehicle.getId());
 
-        assertEquals(vehicle.getId(), actualResult.getId());
+        assertEquals(vehicle, actualResult);
     }
 
     @Test
     void createVehicle() {
         User carrier = getCarrier();
+        session.persist(carrier);
         Vehicle vehicle = Vehicle.builder()
-                .carrierId(carrier)
+                .carrier(carrier)
                 .licensePlate("1234")
                 .capacity(BigDecimal.valueOf(25.9))
                 .palletCapacity(18)
                 .refrigerated(false)
                 .model("ISUZU")
                 .build();
-
         session.persist(vehicle);
+        session.flush();
+        session.clear();
 
-        assertNotNull(vehicle.getId());
+        Vehicle actualResult = session.get(Vehicle.class, vehicle.getId());
+
+        assertEquals(vehicle, actualResult);
     }
 
     private static User getCarrier() {
@@ -115,17 +107,6 @@ class VehicleIT {
                 .contactInfo("alexandra@example.com")
                 .address("Lobonka 44")
                 .build();
-    }
-
-    @AfterEach
-    void closeSession() {
-        session.getTransaction().rollback();
-        session.close();
-    }
-
-    @AfterAll
-    static void closeSessionFactory() {
-        sessionFactory.close();
     }
 
 }
