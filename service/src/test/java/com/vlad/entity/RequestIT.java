@@ -4,6 +4,7 @@ import com.vlad.TestBase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +23,7 @@ class RequestIT extends TestBase {
                 .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
-                .weight(BigDecimal.valueOf(100.59))
+                .weight(BigDecimal.valueOf(100.50).setScale(2, RoundingMode.HALF_UP))
                 .palletCount(20)
                 .refrigerated(true)
                 .pickupAddress("Selitskogo 21")
@@ -50,7 +51,7 @@ class RequestIT extends TestBase {
                 .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
-                .weight(BigDecimal.valueOf(100.59))
+                .weight(BigDecimal.valueOf(100.50).setScale(2, RoundingMode.HALF_UP))
                 .palletCount(20)
                 .refrigerated(true)
                 .pickupAddress("Selitskogo 21")
@@ -80,7 +81,7 @@ class RequestIT extends TestBase {
                 .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
-                .weight(BigDecimal.valueOf(100.59))
+                .weight(BigDecimal.valueOf(100.50).setScale(2, RoundingMode.HALF_UP))
                 .palletCount(20)
                 .refrigerated(true)
                 .pickupAddress("Selitskogo 21")
@@ -108,7 +109,7 @@ class RequestIT extends TestBase {
                 .customer(customer)
                 .status(RequestStatus.PENDING)
                 .cargoDetails("Fresh Fish")
-                .weight(BigDecimal.valueOf(100.59))
+                .weight(BigDecimal.valueOf(100.55).setScale(2, RoundingMode.HALF_UP))
                 .palletCount(20)
                 .refrigerated(true)
                 .pickupAddress("Selitskogo 21")
