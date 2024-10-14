@@ -14,9 +14,9 @@ public abstract class TestBase {
     protected Session session;
 
     @BeforeAll
-    static void createSessionFactory() {
-        sessionFactory = HibernateTestUtil.buildSessionFactory();
-    }
+//    static void createSessionFactory() {
+//        sessionFactory = HibernateTestUtil.buildSessionFactory();
+//    }
 
     @AfterAll
     static void closeSessionFactory() {
