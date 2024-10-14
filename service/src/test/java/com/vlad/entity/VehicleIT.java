@@ -72,7 +72,7 @@ class VehicleIT extends TestBase {
                 .from(QVehicle.vehicle)
                 .join(QVehicle.vehicle.carrier, QUser.user)
                 .where(QVehicle.vehicle.refrigerated.eq(true))
-                .setHint(GraphSemantic.LOAD.getJakartaHintName(),session.getEntityGraph("VehicleWithCarrier"))
+                .setHint(GraphSemantic.FETCH.getJakartaHintName(),session.getEntityGraph("VehicleWithCarrier"))
                 .fetch();
 
         assertEquals(2, refrigeratedVehicles.size());
