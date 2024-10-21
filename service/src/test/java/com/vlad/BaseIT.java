@@ -2,40 +2,42 @@ package com.vlad;
 
 import com.vlad.util.HibernateTestUtil;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+
+import java.lang.reflect.Proxy;
+
 public abstract class BaseIT {
 
-    private static EntityManagerFactory entityManagerFactory;
-    protected EntityManager entityManager;
+    private static SessionFactory sessionFactory;
+    protected static EntityManager entityManager;
 
     @BeforeAll
-    static void setupEntityManagerFactory() {
-        entityManagerFactory = HibernateTestUtil.buildEntityManagerFactory();
+    static void setupSessionFactory() {
+        sessionFactory = HibernateTestUtil.buildSessionFactory();
+        entityManager = (EntityManager) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(), new Class[]{Session.class},
+                (proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(), args));
     }
 
     @BeforeEach
-    void openEntityManager() {
-        entityManager = entityManagerFactory.createEntityManager();
+    void beginTransaction() {
         entityManager.getTransaction().begin();
     }
 
     @AfterEach
-    void closeEntityManager() {
-        if (entityManager.getTransaction().isActive()) {
-            entityManager.getTransaction().rollback();
-        }
-        entityManager.close();
+    void closeTransaction() {
+        entityManager.getTransaction().rollback();
     }
 
     @AfterAll
-    static void shoutDownEntityManagerFactory() {
-        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-            entityManagerFactory.close();
+    static void shoutDownSessionFactory() {
+        if (sessionFactory != null && sessionFactory.isOpen()) {
+            sessionFactory.close();
         }
     }
 }
