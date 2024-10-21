@@ -8,7 +8,7 @@ public interface BaseRepository<K extends Serializable, E> {
 
     E save(E entity);
 
-    void delete(K id);
+    void delete(E entity);
 
     void update(E entity);
 

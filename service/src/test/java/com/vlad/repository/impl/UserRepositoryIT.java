@@ -3,6 +3,8 @@ package com.vlad.repository.impl;
 import com.vlad.BaseIT;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,61 +16,45 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-class UserRepositoryImplIT extends BaseIT {
+class UserRepositoryIT extends BaseIT {
 
-    private UserRepositoryImpl userRepository;
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = new UserRepository(entityManager);
+    }
 
     @Test
     void deleteUser(){
-        userRepository = new UserRepositoryImpl(entityManager);
-        User user = new User();
-        user.setUsername("MickyMouse");
-        user.setPassword("123MickyMouse123");
-        user.setRole(Role.GUEST);
-        user.setName("Martin");
-        user.setContactInfo("martin@gmail.com");
-        user.setAddress("Mazurova 4-56");
+        User user = getUser();
         userRepository.save(user);
-        userRepository.delete(user.getId());
+
+        userRepository.delete(user);
+
         entityManager.clear();
-
         Optional<User> actualResult = userRepository.findById(user.getId());
-
         assertFalse(actualResult.isPresent());
     }
 
     @Test
     void updateUser(){
-        userRepository = new UserRepositoryImpl(entityManager);
-        User user = new User();
-        user.setUsername("MickyMouse");
-        user.setPassword("123MickyMouse123");
-        user.setRole(Role.GUEST);
-        user.setName("Martin");
-        user.setContactInfo("martin@gmail.com");
-        user.setAddress("Mazurova 4-56");
+        User user = getUser();
         userRepository.save(user);
         user.setName("TIMON");
+
         userRepository.update(user);
+
         entityManager.flush();
         entityManager.clear();
-
         Optional<User> actualResult = userRepository.findById(user.getId());
-
         assertTrue(actualResult.isPresent());
         assertEquals("TIMON", actualResult.get().getName());
     }
 
     @Test
     void getAllUsers(){
-        userRepository = new UserRepositoryImpl(entityManager);
-        User user1 = new User();
-        user1.setUsername("MickyMouse");
-        user1.setPassword("123MickyMouse123");
-        user1.setRole(Role.GUEST);
-        user1.setName("Martin");
-        user1.setContactInfo("martin@gmail.com");
-        user1.setAddress("Mazurova 4-56");
+        User user1 = getUser();
         userRepository.save(user1);
         User user2 = new User();
         user2.setUsername("Sallywan");
@@ -89,7 +75,18 @@ class UserRepositoryImplIT extends BaseIT {
 
     @Test
     void saveUser() {
-        userRepository = new UserRepositoryImpl(entityManager);
+        User user = getUser();
+
+        userRepository.save(user);
+
+        entityManager.flush();
+        entityManager.clear();
+        Optional<User> actualResult = userRepository.findById(user.getId());
+        assertTrue(actualResult.isPresent());
+        assertEquals(user, actualResult.get());
+    }
+
+    private static @NotNull User getUser() {
         User user = new User();
         user.setUsername("MickyMouse");
         user.setPassword("123MickyMouse123");
@@ -97,14 +94,7 @@ class UserRepositoryImplIT extends BaseIT {
         user.setName("Martin");
         user.setContactInfo("martin@gmail.com");
         user.setAddress("Mazurova 4-56");
-        userRepository.save(user);
-        entityManager.flush();
-        entityManager.clear();
-
-        Optional<User> actualResult = userRepository.findById(user.getId());
-
-        assertTrue(actualResult.isPresent());
-        assertEquals(user, actualResult.get());
+        return user;
     }
 
 }

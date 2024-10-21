@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public abstract class BaseAbstractRepository<K extends Serializable, E> implements BaseRepository<K, E> {
+public abstract class AbstractRepository<K extends Serializable, E> implements BaseRepository<K, E> {
 
     private final Class<E> entityClass;
-    private final EntityManager entityManager;
+    protected final EntityManager entityManager;
 
     @Override
     public E save(E entity) {
@@ -21,12 +21,14 @@ public abstract class BaseAbstractRepository<K extends Serializable, E> implemen
     }
 
     @Override
-    public void delete(K id) {
-        Optional<E> entityOptional = findById(id);
-        entityOptional.ifPresent(entity -> {
+    public void delete(E entity) {
+        if (entityManager.contains(entity)) {
             entityManager.remove(entity);
-            entityManager.flush();
-        });
+        } else {
+            E managedEntity = entityManager.merge(entity);
+            entityManager.remove(managedEntity);
+        }
+        entityManager.flush();
     }
 
     @Override
