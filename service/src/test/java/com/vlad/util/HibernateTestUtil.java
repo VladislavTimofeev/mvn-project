@@ -1,5 +1,6 @@
 package com.vlad.util;
 
+import jakarta.persistence.EntityManagerFactory;
 import lombok.experimental.UtilityClass;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -14,13 +15,13 @@ public class HibernateTestUtil {
         postgres.start();
     }
 
-    public static SessionFactory buildSessionFactory() {
+    public static EntityManagerFactory buildEntityManagerFactory() {
         Configuration configuration = HibernateUtil.buildConfiguration();
         configuration.setProperty("hibernate.connection.url", postgres.getJdbcUrl());
         configuration.setProperty("hibernate.connection.username", postgres.getUsername());
         configuration.setProperty("hibernate.connection.password", postgres.getPassword());
         configuration.configure();
 
-        return configuration.buildSessionFactory();
+        return configuration.buildSessionFactory().unwrap(EntityManagerFactory.class);
     }
 }

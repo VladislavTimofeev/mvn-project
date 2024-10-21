@@ -10,6 +10,7 @@
         <property name="format_sql">true</property>
         <!-- DB schema will be updated if needed -->
         <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.current_session_context_class">thread</property>
 
         <mapping class="com.vlad.entity.User"/>
         <mapping class="com.vlad.entity.Driver"/>
