@@ -5,6 +5,8 @@ import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,89 +20,59 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RequestRepositoryImplIT extends BaseIT {
+class RequestRepositoryIT extends BaseIT {
 
-    private RequestRepositoryImpl requestRepository;
-    private UserRepositoryImpl userRepository;
+    private RequestRepository requestRepository;
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = new UserRepository(entityManager);
+        requestRepository = new RequestRepository(entityManager);
+    }
 
     @Test
     void deleteRequest() {
-        userRepository = new UserRepositoryImpl(entityManager);
-        requestRepository = new RequestRepositoryImpl(entityManager);
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
         userRepository.save(carrier);
-        Request request = new Request();
-        request.setCustomer(customer);
-        request.setStatus(RequestStatus.PENDING);
-        request.setCargoDetails("Cargo Details");
-        request.setWeight(BigDecimal.valueOf(2500.90).setScale(2, RoundingMode.HALF_UP));
-        request.setPalletCount(25);
-        request.setRefrigerated(false);
-        request.setPickupAddress("Kolasa 45");
-        request.setDeliveryAddress("Selitskogo 21");
-        request.setCreationDate(LocalDate.now());
-        request.setCarrier(carrier);
+        Request request = getRequest(customer, carrier);
         requestRepository.save(request);
-        requestRepository.delete(request.getId());
+
+        requestRepository.delete(request);
+
         entityManager.clear();
-
         Optional<Request> actualResult = requestRepository.findById(request.getId());
-
         assertFalse(actualResult.isPresent());
     }
 
     @Test
     void updateRequest() {
-        userRepository = new UserRepositoryImpl(entityManager);
-        requestRepository = new RequestRepositoryImpl(entityManager);
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
         userRepository.save(carrier);
-        Request request = new Request();
-        request.setCustomer(customer);
-        request.setStatus(RequestStatus.PENDING);
-        request.setCargoDetails("Cargo Details");
-        request.setWeight(BigDecimal.valueOf(2500.90).setScale(2, RoundingMode.HALF_UP));
-        request.setPalletCount(25);
-        request.setRefrigerated(false);
-        request.setPickupAddress("Kolasa 45");
-        request.setDeliveryAddress("Selitskogo 21");
-        request.setCreationDate(LocalDate.now());
-        request.setCarrier(carrier);
+        Request request = getRequest(customer, carrier);
         requestRepository.save(request);
         request.setStatus(RequestStatus.IN_PROGRESS);
+
         requestRepository.update(request);
+
         entityManager.flush();
         entityManager.clear();
-
         Optional<Request> actualResult = requestRepository.findById(request.getId());
-
         assertTrue(actualResult.isPresent());
         assertEquals(RequestStatus.IN_PROGRESS, actualResult.get().getStatus());
     }
 
     @Test
     void getAllRequests() {
-        userRepository = new UserRepositoryImpl(entityManager);
-        requestRepository = new RequestRepositoryImpl(entityManager);
         User customer1 = getCustomer();
         userRepository.save(customer1);
         User carrier1 = getCarrier();
         userRepository.save(carrier1);
-        Request request = new Request();
-        request.setCustomer(customer1);
-        request.setStatus(RequestStatus.PENDING);
-        request.setCargoDetails("Cargo Details");
-        request.setWeight(BigDecimal.valueOf(2500.90).setScale(2, RoundingMode.HALF_UP));
-        request.setPalletCount(25);
-        request.setRefrigerated(false);
-        request.setPickupAddress("Kolasa 45");
-        request.setDeliveryAddress("Selitskogo 21");
-        request.setCreationDate(LocalDate.now());
-        request.setCarrier(carrier1);
+        Request request = getRequest(customer1, carrier1);
         requestRepository.save(request);
         User customer2 = getCustomer1();
         userRepository.save(customer2);
@@ -129,12 +101,22 @@ class RequestRepositoryImplIT extends BaseIT {
 
     @Test
     void saveRequest() {
-        userRepository = new UserRepositoryImpl(entityManager);
-        requestRepository = new RequestRepositoryImpl(entityManager);
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
         userRepository.save(carrier);
+        Request request = getRequest(customer, carrier);
+
+        requestRepository.save(request);
+
+        entityManager.flush();
+        entityManager.clear();
+        Optional<Request> actualResult = requestRepository.findById(request.getId());
+        assertTrue(actualResult.isPresent());
+        assertEquals(request, actualResult.get());
+    }
+
+    private static @NotNull Request getRequest(User customer, User carrier) {
         Request request = new Request();
         request.setCustomer(customer);
         request.setStatus(RequestStatus.PENDING);
@@ -146,14 +128,7 @@ class RequestRepositoryImplIT extends BaseIT {
         request.setDeliveryAddress("Selitskogo 21");
         request.setCreationDate(LocalDate.now());
         request.setCarrier(carrier);
-        requestRepository.save(request);
-        entityManager.flush();
-        entityManager.clear();
-
-        Optional<Request> actualResult = requestRepository.findById(request.getId());
-
-        assertTrue(actualResult.isPresent());
-        assertEquals(request, actualResult.get());
+        return request;
     }
 
     private static User getCarrier1() {
