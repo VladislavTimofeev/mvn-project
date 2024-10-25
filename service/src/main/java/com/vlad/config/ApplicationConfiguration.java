@@ -15,7 +15,7 @@ import java.lang.reflect.Proxy;
 @ComponentScan(basePackages = "com.vlad")
 public class ApplicationConfiguration {
 
-    @Bean
+    @Bean(destroyMethod = "close")
     public SessionFactory sessionFactory() {
         return HibernateUtil.buildSessionFactory();
     }
