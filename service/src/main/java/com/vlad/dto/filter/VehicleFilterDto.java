@@ -1,4 +1,4 @@
-package com.vlad.dto;
+package com.vlad.dto.filter;
 
 import lombok.Builder;
 import lombok.Value;
@@ -8,4 +8,5 @@ import lombok.Value;
 public class VehicleFilterDto {
     Integer palletCapacity;
     Boolean refrigerated;
+    String model;
 }

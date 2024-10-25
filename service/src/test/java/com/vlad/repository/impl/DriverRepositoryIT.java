@@ -4,7 +4,6 @@ import com.vlad.BaseIT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +22,8 @@ class DriverRepositoryIT extends BaseIT {
 
     @BeforeEach
     void setUp() {
-        userRepository = new UserRepository(entityManager);
-        driverRepository = new DriverRepository(entityManager);
+        userRepository = context.getBean(UserRepository.class);
+        driverRepository = context.getBean(DriverRepository.class);
     }
 
     @Test
@@ -90,7 +89,7 @@ class DriverRepositoryIT extends BaseIT {
         assertEquals(driver, actualResult.get());
     }
 
-    private static @NotNull Driver getDriver(User user, String name, String licenseNumber, String number) {
+    private static Driver getDriver(User user, String name, String licenseNumber, String number) {
         Driver driver = new Driver();
         driver.setCarrier(user);
         driver.setName(name);

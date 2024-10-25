@@ -22,12 +22,7 @@ public abstract class AbstractRepository<K extends Serializable, E> implements B
 
     @Override
     public void delete(E entity) {
-        if (entityManager.contains(entity)) {
-            entityManager.remove(entity);
-        } else {
-            E managedEntity = entityManager.merge(entity);
-            entityManager.remove(managedEntity);
-        }
+        entityManager.remove(entity);
         entityManager.flush();
     }
 

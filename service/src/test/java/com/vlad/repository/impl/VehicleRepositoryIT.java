@@ -1,11 +1,10 @@
 package com.vlad.repository.impl;
 
 import com.vlad.BaseIT;
-import com.vlad.dto.VehicleFilterDto;
+import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,12 +25,12 @@ class VehicleRepositoryIT extends BaseIT {
 
     @BeforeEach
     void setUp() {
-        userRepository = new UserRepository(entityManager);
-        vehicleRepository = new VehicleRepository(entityManager);
+        userRepository = context.getBean(UserRepository.class);
+        vehicleRepository = context.getBean(VehicleRepository.class);
     }
 
     @Test
-    void getVehicleByRefAndPalletCountWithFilter() {
+    void getVehicleByFilter() {
         User carrier = getUser();
         entityManager.persist(carrier);
         Vehicle vehicle1 = new Vehicle();
@@ -55,9 +54,10 @@ class VehicleRepositoryIT extends BaseIT {
         VehicleFilterDto filter = VehicleFilterDto.builder()
                 .palletCapacity(25)
                 .refrigerated(true)
+                .model("ISUZU")
                 .build();
 
-        List<Vehicle> actualResult = vehicleRepository.getVehicleByRefAndPalletCount(filter);
+        List<Vehicle> actualResult = vehicleRepository.getVehicleByFilter(filter);
 
         assertEquals(vehicle1, actualResult.get(0));
     }
@@ -125,7 +125,7 @@ class VehicleRepositoryIT extends BaseIT {
         assertEquals(vehicle, actualResult.get());
     }
 
-    private static @NotNull Vehicle getVehicle(User user) {
+    private static Vehicle getVehicle(User user) {
         Vehicle vehicle = new Vehicle();
         vehicle.setCarrier(user);
         vehicle.setLicensePlate("AA1234-5");

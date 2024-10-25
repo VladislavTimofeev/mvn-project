@@ -1,7 +1,7 @@
 package com.vlad.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQuery;
-import com.vlad.dto.VehicleFilterDto;
+import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.entity.QUser;
 import com.vlad.entity.QVehicle;
 import com.vlad.entity.Vehicle;
@@ -22,10 +22,11 @@ public class VehicleRepository extends AbstractRepository<Long, Vehicle> {
         super(Vehicle.class, entityManager);
     }
 
-    public List<Vehicle> getVehicleByRefAndPalletCount(VehicleFilterDto filterDto) {
+    public List<Vehicle> getVehicleByFilter(VehicleFilterDto filterDto) {
         Predicate predicate = QPredicate.builder()
                 .add(filterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
                 .add(filterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
+                .add(filterDto.getModel(), QVehicle.vehicle.model::eq)
                 .buildAnd();
         return new JPAQuery<>(entityManager)
                 .select(QVehicle.vehicle)

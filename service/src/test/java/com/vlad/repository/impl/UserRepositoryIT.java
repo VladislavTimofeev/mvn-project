@@ -3,7 +3,6 @@ package com.vlad.repository.impl;
 import com.vlad.BaseIT;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +21,7 @@ class UserRepositoryIT extends BaseIT {
 
     @BeforeEach
     void setUp() {
-        userRepository = new UserRepository(entityManager);
+        userRepository = context.getBean(UserRepository.class);
     }
 
     @Test
@@ -86,7 +85,7 @@ class UserRepositoryIT extends BaseIT {
         assertEquals(user, actualResult.get());
     }
 
-    private static @NotNull User getUser() {
+    private static User getUser() {
         User user = new User();
         user.setUsername("MickyMouse");
         user.setPassword("123MickyMouse123");

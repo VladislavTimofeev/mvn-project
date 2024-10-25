@@ -1,31 +1,26 @@
 package com.vlad;
 
-import com.vlad.util.HibernateTestUtil;
+import com.vlad.config.AppConfig;
 import jakarta.persistence.EntityManager;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-
-
-import java.lang.reflect.Proxy;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public abstract class BaseIT {
 
-    private static SessionFactory sessionFactory;
     protected static EntityManager entityManager;
+    protected static AnnotationConfigApplicationContext context;
 
     @BeforeAll
-    static void setupSessionFactory() {
-        sessionFactory = HibernateTestUtil.buildSessionFactory();
-        entityManager = (EntityManager) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(), new Class[]{Session.class},
-                (proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(), args));
+    static void setupApplicationContext() {
+        context = new AnnotationConfigApplicationContext(AppConfig.class);
     }
 
     @BeforeEach
     void beginTransaction() {
+        entityManager = context.getBean(EntityManager.class);
         entityManager.getTransaction().begin();
     }
 
@@ -35,9 +30,7 @@ public abstract class BaseIT {
     }
 
     @AfterAll
-    static void shoutDownSessionFactory() {
-        if (sessionFactory != null && sessionFactory.isOpen()) {
-            sessionFactory.close();
-        }
+    static void closeApplicationContext() {
+        context.close();
     }
 }

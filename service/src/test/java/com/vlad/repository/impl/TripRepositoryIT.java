@@ -9,7 +9,6 @@ import com.vlad.entity.Trip;
 import com.vlad.entity.TripStatus;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,11 +31,11 @@ class TripRepositoryIT extends BaseIT {
 
     @BeforeEach
     void setUp() {
-        userRepository = new UserRepository(entityManager);
-        requestRepository = new RequestRepository(entityManager);
-        vehicleRepository = new VehicleRepository(entityManager);
-        driverRepository = new DriverRepository(entityManager);
-        tripRepository = new TripRepository(entityManager);
+        userRepository = context.getBean(UserRepository.class);
+        requestRepository = context.getBean(RequestRepository.class);
+        vehicleRepository = context.getBean(VehicleRepository.class);
+        driverRepository = context.getBean(DriverRepository.class);
+        tripRepository = context.getBean(TripRepository.class);
     }
 
     @Test
@@ -111,7 +110,7 @@ class TripRepositoryIT extends BaseIT {
         assertEquals(trip, actualResult.get());
     }
 
-    private static @NotNull Vehicle getVehicle(User carrier) {
+    private static Vehicle getVehicle(User carrier) {
         Vehicle vehicle = new Vehicle();
         vehicle.setCarrier(carrier);
         vehicle.setLicensePlate("AA1234-5");
@@ -122,7 +121,7 @@ class TripRepositoryIT extends BaseIT {
         return vehicle;
     }
 
-    private static @NotNull Trip getTrip(Request request, Vehicle vehicle, Driver driver) {
+    private static Trip getTrip(Request request, Vehicle vehicle, Driver driver) {
         Trip trip = new Trip();
         trip.setRequest(request);
         trip.setVehicle(vehicle);
@@ -133,7 +132,7 @@ class TripRepositoryIT extends BaseIT {
         return trip;
     }
 
-    private static @NotNull Driver getDriver(User carrier) {
+    private static Driver getDriver(User carrier) {
         Driver driver = new Driver();
         driver.setCarrier(carrier);
         driver.setName("Volodimir");
@@ -142,7 +141,7 @@ class TripRepositoryIT extends BaseIT {
         return driver;
     }
 
-    private static @NotNull Request getRequest(User customer, User carrier) {
+    private static Request getRequest(User customer, User carrier) {
         Request request = new Request();
         request.setCustomer(customer);
         request.setStatus(RequestStatus.PENDING);
