@@ -13,7 +13,9 @@ import org.hibernate.graph.GraphSemantic;
 import java.util.List;
 
 import com.querydsl.core.types.Predicate;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class VehicleRepository extends AbstractRepository<Long, Vehicle> {
 
     public VehicleRepository(EntityManager entityManager) {

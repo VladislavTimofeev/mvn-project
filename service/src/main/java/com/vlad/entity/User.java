@@ -37,6 +37,8 @@ public class User {
     private Role role;
 
     private String name;
+
+    @Column(name = "contact_info")
     private String contactInfo;
     private String address;
 }
