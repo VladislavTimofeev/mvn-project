@@ -1,6 +1,7 @@
 package com.vlad.repository.impl;
 
 import com.vlad.BaseIT;
+import com.vlad.dto.VehicleFilterDto;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
@@ -27,6 +28,38 @@ class VehicleRepositoryIT extends BaseIT {
     void setUp() {
         userRepository = new UserRepository(entityManager);
         vehicleRepository = new VehicleRepository(entityManager);
+    }
+
+    @Test
+    void getVehicleByRefAndPalletCountWithFilter() {
+        User carrier = getUser();
+        entityManager.persist(carrier);
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setCarrier(carrier);
+        vehicle1.setLicensePlate("AA1234-5");
+        vehicle1.setCapacity(BigDecimal.valueOf(33.55).setScale(2, RoundingMode.HALF_UP));
+        vehicle1.setPalletCapacity(25);
+        vehicle1.setRefrigerated(true);
+        vehicle1.setModel("ISUZU");
+        entityManager.persist(vehicle1);
+        Vehicle vehicle2 = new Vehicle();
+        vehicle2.setCarrier(carrier);
+        vehicle2.setLicensePlate("BB1234-6");
+        vehicle2.setCapacity(BigDecimal.valueOf(25.90).setScale(2, RoundingMode.HALF_UP));
+        vehicle2.setPalletCapacity(30);
+        vehicle2.setRefrigerated(false);
+        vehicle2.setModel("TOYOTA");
+        entityManager.persist(vehicle2);
+        entityManager.flush();
+        entityManager.clear();
+        VehicleFilterDto filter = VehicleFilterDto.builder()
+                .palletCapacity(25)
+                .refrigerated(true)
+                .build();
+
+        List<Vehicle> actualResult = vehicleRepository.getVehicleByRefAndPalletCount(filter);
+
+        assertEquals(vehicle1, actualResult.get(0));
     }
 
     @Test
