@@ -1,6 +1,6 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
+import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
@@ -9,7 +9,7 @@ import com.vlad.entity.Trip;
 import com.vlad.entity.TripStatus;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -21,22 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TripRepositoryIT extends BaseIT {
+@IT
+@RequiredArgsConstructor
+class TripRepositoryIT {
 
-    private TripRepository tripRepository;
-    private RequestRepository requestRepository;
-    private UserRepository userRepository;
-    private VehicleRepository vehicleRepository;
-    private DriverRepository driverRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository = context.getBean(UserRepository.class);
-        requestRepository = context.getBean(RequestRepository.class);
-        vehicleRepository = context.getBean(VehicleRepository.class);
-        driverRepository = context.getBean(DriverRepository.class);
-        tripRepository = context.getBean(TripRepository.class);
-    }
+    private final TripRepository tripRepository;
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
+    private final DriverRepository driverRepository;
 
     @Test
     void deleteTrip(){
@@ -55,12 +48,9 @@ class TripRepositoryIT extends BaseIT {
 
         tripRepository.delete(trip);
 
-        entityManager.clear();
         Optional<Trip> actualResult = tripRepository.findById(trip.getId());
         assertFalse(actualResult.isPresent());
     }
-
-
 
     @Test
     void updateTrip(){
@@ -80,8 +70,6 @@ class TripRepositoryIT extends BaseIT {
 
         tripRepository.update(trip);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Trip> actualResult = tripRepository.findById(trip.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(TripStatus.COMPLETED, actualResult.get().getStatus());
@@ -103,8 +91,6 @@ class TripRepositoryIT extends BaseIT {
 
         tripRepository.save(trip);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Trip> actualResult = tripRepository.findById(trip.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(trip, actualResult.get());
