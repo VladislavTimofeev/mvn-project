@@ -1,12 +1,12 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
+import com.vlad.annotation.IT;
 import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -20,16 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RequestRepositoryIT extends BaseIT {
+@IT
+@RequiredArgsConstructor
+class RequestRepositoryIT {
 
-    private RequestRepository requestRepository;
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository = context.getBean(UserRepository.class);
-        requestRepository = context.getBean(RequestRepository.class);
-    }
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
 
     @Test
     void getRequestByFilter(){
@@ -53,8 +49,6 @@ class RequestRepositoryIT extends BaseIT {
         requestRepository.save(request);
         requestRepository.save(request1);
         requestRepository.save(request2);
-        entityManager.flush();
-        entityManager.clear();
         RequestFilterDto filter = RequestFilterDto.builder()
                 .status(RequestStatus.IN_PROGRESS)
                 .pickupAddress("Yanki 33")
@@ -77,7 +71,6 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.delete(request);
 
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertFalse(actualResult.isPresent());
     }
@@ -94,8 +87,6 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.update(request);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(RequestStatus.IN_PROGRESS, actualResult.get().getStatus());
@@ -125,8 +116,6 @@ class RequestRepositoryIT extends BaseIT {
         request2.setCreationDate(LocalDate.now());
         request2.setCarrier(carrier2);
         requestRepository.save(request2);
-        entityManager.flush();
-        entityManager.clear();
 
         List<Request> actualResult = requestRepository.findAll();
 
@@ -144,8 +133,6 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.save(request);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(request, actualResult.get());
