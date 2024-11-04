@@ -1,6 +1,5 @@
-package com.vlad.repository.impl;
+package com.vlad.repository;
 
-import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
@@ -9,6 +8,7 @@ import com.vlad.entity.Trip;
 import com.vlad.entity.TripStatus;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
+import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +17,12 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@IT
 @RequiredArgsConstructor
-class TripRepositoryIT {
+class TripRepositoryIT extends IntegrationTestBase {
 
     private final TripRepository tripRepository;
     private final RequestRepository requestRepository;
@@ -32,7 +31,7 @@ class TripRepositoryIT {
     private final DriverRepository driverRepository;
 
     @Test
-    void deleteTrip(){
+    void deleteTrip() {
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
@@ -53,7 +52,7 @@ class TripRepositoryIT {
     }
 
     @Test
-    void updateTrip(){
+    void updateTrip() {
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
@@ -68,7 +67,7 @@ class TripRepositoryIT {
         tripRepository.save(trip);
         trip.setStatus(TripStatus.COMPLETED);
 
-        tripRepository.update(trip);
+        tripRepository.save(trip);
 
         Optional<Trip> actualResult = tripRepository.findById(trip.getId());
         assertTrue(actualResult.isPresent());
@@ -163,5 +162,4 @@ class TripRepositoryIT {
         user.setAddress("Mazurova 4-56");
         return user;
     }
-
 }

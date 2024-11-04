@@ -1,11 +1,11 @@
-package com.vlad.repository.impl;
+package com.vlad.repository;
 
-import com.vlad.annotation.IT;
 import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
+import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -16,19 +16,18 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@IT
 @RequiredArgsConstructor
-class RequestRepositoryIT {
+class RequestRepositoryIT extends IntegrationTestBase {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
 
     @Test
-    void getRequestByFilter(){
+    void getRequestByFilter() {
         User customer = getCustomer();
         userRepository.save(customer);
         User carrier = getCarrier();
@@ -55,7 +54,7 @@ class RequestRepositoryIT {
                 .deliveryAddress("Masherova 2")
                 .build();
 
-        List<Request> actualResult = requestRepository.getRequestByFilter(filter);
+        List<Request> actualResult = requestRepository.findAllByFilter(filter);
 
         assertEquals(request, actualResult.get(0));
     }
@@ -85,7 +84,7 @@ class RequestRepositoryIT {
         requestRepository.save(request);
         request.setStatus(RequestStatus.IN_PROGRESS);
 
-        requestRepository.update(request);
+        requestRepository.save(request);
 
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertTrue(actualResult.isPresent());
@@ -196,5 +195,4 @@ class RequestRepositoryIT {
         user.setAddress("Mazurova 4-56");
         return user;
     }
-
 }
