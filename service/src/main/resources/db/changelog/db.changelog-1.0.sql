@@ -1,5 +1,7 @@
--- Таблица для хранения данных о пользователях системы для логина
-CREATE TABLE users
+--liquibase formatted sql
+
+--changeset vtsimafeyeu:1
+CREATE TABLE IF NOT EXISTS users
 (
     id           SERIAL PRIMARY KEY,
     username     VARCHAR(255) UNIQUE NOT NULL,
@@ -9,9 +11,10 @@ CREATE TABLE users
     contact_info VARCHAR(255),
     address      VARCHAR(255)
 );
+-- rollback DROP TABLE users;
 
--- Таблица заявок
-CREATE TABLE request
+--changeset vtsimafeyeu:2
+CREATE TABLE IF NOT EXISTS request
 (
     id               SERIAL PRIMARY KEY,
     customer_id      BIGINT         NOT NULL,
@@ -27,9 +30,10 @@ CREATE TABLE request
     FOREIGN KEY (customer_id) REFERENCES users (id),
     FOREIGN KEY (carrier_id) REFERENCES users (id)
 );
+-- rollback DROP TABLE request;
 
--- Таблица транспорта
-CREATE TABLE vehicle
+--changeset vtsimafeyeu:3
+CREATE TABLE IF NOT EXISTS vehicle
 (
     id              SERIAL PRIMARY KEY,
     carrier_id      BIGINT         NOT NULL,
@@ -40,9 +44,10 @@ CREATE TABLE vehicle
     model           VARCHAR(255),
     FOREIGN KEY (carrier_id) REFERENCES users (id)
 );
+-- rollback DROP TABLE vehicle;
 
--- Таблица водителей
-CREATE TABLE driver
+--changeset vtsimafeyeu:4
+CREATE TABLE IF NOT EXISTS driver
 (
     id             SERIAL PRIMARY KEY,
     carrier_id     BIGINT       NOT NULL,
@@ -51,9 +56,10 @@ CREATE TABLE driver
     phone_number   VARCHAR(20),
     FOREIGN KEY (carrier_id) REFERENCES users (id)
 );
+-- rollback DROP TABLE driver;
 
--- Таблица рейсов
-CREATE TABLE trip
+--changeset vtsimafeyeu:5
+CREATE TABLE IF NOT EXISTS trip
 (
     id             SERIAL PRIMARY KEY,
     request_id     BIGINT      NOT NULL,
@@ -62,7 +68,8 @@ CREATE TABLE trip
     departure_time TIMESTAMP,
     arrival_time   TIMESTAMP,
     status         VARCHAR(255) NOT NULL DEFAULT 'PENDING',
-    FOREIGN KEY (request_id) REFERENCES requests (id),
-    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
-    FOREIGN KEY (driver_id) REFERENCES drivers (id)
+    FOREIGN KEY (request_id) REFERENCES request (id),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicle (id),
+    FOREIGN KEY (driver_id) REFERENCES driver (id)
 );
+-- rollback DROP TABLE trip;
