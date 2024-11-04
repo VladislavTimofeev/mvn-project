@@ -1,12 +1,11 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
-import com.vlad.dto.VehicleFilterDto;
+import com.vlad.annotation.IT;
+import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -19,21 +18,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class VehicleRepositoryIT extends BaseIT {
+@IT
+@RequiredArgsConstructor
+class VehicleRepositoryIT {
 
-    private VehicleRepository vehicleRepository;
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository = new UserRepository(entityManager);
-        vehicleRepository = new VehicleRepository(entityManager);
-    }
+    private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
 
     @Test
-    void getVehicleByRefAndPalletCountWithFilter() {
+    void getVehicleByFilter() {
         User carrier = getUser();
-        entityManager.persist(carrier);
+        userRepository.save(carrier);
         Vehicle vehicle1 = new Vehicle();
         vehicle1.setCarrier(carrier);
         vehicle1.setLicensePlate("AA1234-5");
@@ -41,7 +36,7 @@ class VehicleRepositoryIT extends BaseIT {
         vehicle1.setPalletCapacity(25);
         vehicle1.setRefrigerated(true);
         vehicle1.setModel("ISUZU");
-        entityManager.persist(vehicle1);
+        vehicleRepository.save(vehicle1);
         Vehicle vehicle2 = new Vehicle();
         vehicle2.setCarrier(carrier);
         vehicle2.setLicensePlate("BB1234-6");
@@ -49,15 +44,14 @@ class VehicleRepositoryIT extends BaseIT {
         vehicle2.setPalletCapacity(30);
         vehicle2.setRefrigerated(false);
         vehicle2.setModel("TOYOTA");
-        entityManager.persist(vehicle2);
-        entityManager.flush();
-        entityManager.clear();
+        vehicleRepository.save(vehicle2);
         VehicleFilterDto filter = VehicleFilterDto.builder()
                 .palletCapacity(25)
                 .refrigerated(true)
+                .model("ISUZU")
                 .build();
 
-        List<Vehicle> actualResult = vehicleRepository.getVehicleByRefAndPalletCount(filter);
+        List<Vehicle> actualResult = vehicleRepository.getVehicleByFilter(filter);
 
         assertEquals(vehicle1, actualResult.get(0));
     }
@@ -71,7 +65,6 @@ class VehicleRepositoryIT extends BaseIT {
 
         vehicleRepository.delete(vehicle);
 
-        entityManager.clear();
         Optional<Vehicle> actualResult = vehicleRepository.findById(vehicle.getId());
         assertFalse(actualResult.isPresent());
     }
@@ -86,8 +79,6 @@ class VehicleRepositoryIT extends BaseIT {
 
         vehicleRepository.update(vehicle);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Vehicle> actualResult = vehicleRepository.findById(vehicle.getId());
         assertTrue(actualResult.isPresent());
         assertEquals("FORD", actualResult.get().getModel());
@@ -101,8 +92,6 @@ class VehicleRepositoryIT extends BaseIT {
         vehicleRepository.save(vehicle1);
         Vehicle vehicle2 = getVehicle(user);
         vehicleRepository.save(vehicle2);
-        entityManager.flush();
-        entityManager.clear();
 
         List<Vehicle> actualResult = vehicleRepository.findAll();
 
@@ -118,14 +107,12 @@ class VehicleRepositoryIT extends BaseIT {
 
         vehicleRepository.save(vehicle);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Vehicle> actualResult = vehicleRepository.findById(vehicle.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(vehicle, actualResult.get());
     }
 
-    private static @NotNull Vehicle getVehicle(User user) {
+    private static Vehicle getVehicle(User user) {
         Vehicle vehicle = new Vehicle();
         vehicle.setCarrier(user);
         vehicle.setLicensePlate("AA1234-5");

@@ -1,12 +1,12 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
+import com.vlad.annotation.IT;
+import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -20,15 +20,44 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RequestRepositoryIT extends BaseIT {
+@IT
+@RequiredArgsConstructor
+class RequestRepositoryIT {
 
-    private RequestRepository requestRepository;
-    private UserRepository userRepository;
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
-        userRepository = new UserRepository(entityManager);
-        requestRepository = new RequestRepository(entityManager);
+    @Test
+    void getRequestByFilter(){
+        User customer = getCustomer();
+        userRepository.save(customer);
+        User carrier = getCarrier();
+        userRepository.save(carrier);
+        Request request = new Request();
+        request.setCustomer(customer);
+        request.setStatus(RequestStatus.IN_PROGRESS);
+        request.setCargoDetails("Intercars");
+        request.setWeight(BigDecimal.valueOf(1800.90).setScale(2, RoundingMode.HALF_UP));
+        request.setPalletCount(15);
+        request.setRefrigerated(true);
+        request.setPickupAddress("Yanki 33");
+        request.setDeliveryAddress("Masherova 2");
+        request.setCreationDate(LocalDate.now());
+        request.setCarrier(carrier);
+        Request request1 = getRequest(customer, carrier);
+        Request request2 = getRequest(customer, carrier);
+        requestRepository.save(request);
+        requestRepository.save(request1);
+        requestRepository.save(request2);
+        RequestFilterDto filter = RequestFilterDto.builder()
+                .status(RequestStatus.IN_PROGRESS)
+                .pickupAddress("Yanki 33")
+                .deliveryAddress("Masherova 2")
+                .build();
+
+        List<Request> actualResult = requestRepository.getRequestByFilter(filter);
+
+        assertEquals(request, actualResult.get(0));
     }
 
     @Test
@@ -42,7 +71,6 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.delete(request);
 
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertFalse(actualResult.isPresent());
     }
@@ -59,8 +87,6 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.update(request);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(RequestStatus.IN_PROGRESS, actualResult.get().getStatus());
@@ -90,8 +116,6 @@ class RequestRepositoryIT extends BaseIT {
         request2.setCreationDate(LocalDate.now());
         request2.setCarrier(carrier2);
         requestRepository.save(request2);
-        entityManager.flush();
-        entityManager.clear();
 
         List<Request> actualResult = requestRepository.findAll();
 
@@ -109,14 +133,12 @@ class RequestRepositoryIT extends BaseIT {
 
         requestRepository.save(request);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(request, actualResult.get());
     }
 
-    private static @NotNull Request getRequest(User customer, User carrier) {
+    private static Request getRequest(User customer, User carrier) {
         Request request = new Request();
         request.setCustomer(customer);
         request.setStatus(RequestStatus.PENDING);

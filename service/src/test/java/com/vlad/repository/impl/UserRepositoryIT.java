@@ -1,10 +1,9 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
+import com.vlad.annotation.IT;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,15 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@IT
+@RequiredArgsConstructor
+class UserRepositoryIT {
 
-class UserRepositoryIT extends BaseIT {
-
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository = new UserRepository(entityManager);
-    }
+    private final UserRepository userRepository;
 
     @Test
     void deleteUser(){
@@ -32,7 +27,6 @@ class UserRepositoryIT extends BaseIT {
 
         userRepository.delete(user);
 
-        entityManager.clear();
         Optional<User> actualResult = userRepository.findById(user.getId());
         assertFalse(actualResult.isPresent());
     }
@@ -45,8 +39,6 @@ class UserRepositoryIT extends BaseIT {
 
         userRepository.update(user);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<User> actualResult = userRepository.findById(user.getId());
         assertTrue(actualResult.isPresent());
         assertEquals("TIMON", actualResult.get().getName());
@@ -64,8 +56,6 @@ class UserRepositoryIT extends BaseIT {
         user2.setContactInfo("Sally@gmail.com");
         user2.setAddress("Kolasa 5-19");
         userRepository.save(user2);
-        entityManager.flush();
-        entityManager.clear();
 
         List<User> actualResult = userRepository.findAll();
 
@@ -79,14 +69,12 @@ class UserRepositoryIT extends BaseIT {
 
         userRepository.save(user);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<User> actualResult = userRepository.findById(user.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(user, actualResult.get());
     }
 
-    private static @NotNull User getUser() {
+    private static User getUser() {
         User user = new User();
         user.setUsername("MickyMouse");
         user.setPassword("123MickyMouse123");

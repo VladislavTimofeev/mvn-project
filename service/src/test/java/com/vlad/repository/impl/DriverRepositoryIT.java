@@ -1,11 +1,10 @@
 package com.vlad.repository.impl;
 
-import com.vlad.BaseIT;
+import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,16 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DriverRepositoryIT extends BaseIT {
+@IT
+@RequiredArgsConstructor
+class DriverRepositoryIT {
 
-    private DriverRepository driverRepository;
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository = new UserRepository(entityManager);
-        driverRepository = new DriverRepository(entityManager);
-    }
+    private final DriverRepository driverRepository;
+    private final UserRepository userRepository;
 
     @Test
     void deleteDriver() {
@@ -36,7 +31,6 @@ class DriverRepositoryIT extends BaseIT {
 
         driverRepository.delete(driver);
 
-        entityManager.clear();
         Optional<Driver> actualResult = driverRepository.findById(driver.getId());
         assertFalse(actualResult.isPresent());
     }
@@ -51,8 +45,6 @@ class DriverRepositoryIT extends BaseIT {
 
         driverRepository.update(driver);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Driver> actualResult = driverRepository.findById(driver.getId());
         assertTrue(actualResult.isPresent());
         assertEquals("PUMBA", actualResult.get().getName());
@@ -66,8 +58,6 @@ class DriverRepositoryIT extends BaseIT {
         driverRepository.save(driver1);
         Driver driver2 = getDriver(user, "Alexander", "TT-5645-5", "9807865");
         driverRepository.save(driver2);
-        entityManager.flush();
-        entityManager.clear();
 
         List<Driver> actualResult = driverRepository.findAll();
 
@@ -83,14 +73,12 @@ class DriverRepositoryIT extends BaseIT {
 
         driverRepository.save(driver);
 
-        entityManager.flush();
-        entityManager.clear();
         Optional<Driver> actualResult = driverRepository.findById(driver.getId());
         assertTrue(actualResult.isPresent());
         assertEquals(driver, actualResult.get());
     }
 
-    private static @NotNull Driver getDriver(User user, String name, String licenseNumber, String number) {
+    private static Driver getDriver(User user, String name, String licenseNumber, String number) {
         Driver driver = new Driver();
         driver.setCarrier(user);
         driver.setName(name);
