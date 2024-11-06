@@ -1,32 +1,30 @@
 package com.vlad.repository.impl;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.entity.QUser;
 import com.vlad.entity.QVehicle;
 import com.vlad.entity.Vehicle;
-import com.vlad.repository.AbstractRepository;
+import com.vlad.repository.FilterVehicleRepository;
 import com.vlad.repository.QPredicate;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.graph.GraphSemantic;
 
 import java.util.List;
 
-import com.querydsl.core.types.Predicate;
-import org.springframework.stereotype.Repository;
+@RequiredArgsConstructor
+public class FilterVehicleRepositoryImpl implements FilterVehicleRepository {
 
-@Repository
-public class VehicleRepository extends AbstractRepository<Long, Vehicle> {
+    private final EntityManager entityManager;
 
-    public VehicleRepository(EntityManager entityManager) {
-        super(Vehicle.class, entityManager);
-    }
-
-    public List<Vehicle> getVehicleByFilter(VehicleFilterDto filterDto) {
+    @Override
+    public List<Vehicle> findAllByFilter(VehicleFilterDto vehicleFilterDto) {
         Predicate predicate = QPredicate.builder()
-                .add(filterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
-                .add(filterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
-                .add(filterDto.getModel(), QVehicle.vehicle.model::eq)
+                .add(vehicleFilterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
+                .add(vehicleFilterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
+                .add(vehicleFilterDto.getModel(), QVehicle.vehicle.model::eq)
                 .buildAnd();
         return new JPAQuery<>(entityManager)
                 .select(QVehicle.vehicle)

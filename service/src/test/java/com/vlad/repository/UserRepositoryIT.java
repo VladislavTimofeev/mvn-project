@@ -1,4 +1,4 @@
-package com.vlad.repository.impl;
+package com.vlad.repository;
 
 import com.vlad.annotation.IT;
 import com.vlad.entity.Role;
@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @IT
 @RequiredArgsConstructor
@@ -21,7 +19,7 @@ class UserRepositoryIT {
     private final UserRepository userRepository;
 
     @Test
-    void deleteUser(){
+    void deleteUser() {
         User user = getUser();
         userRepository.save(user);
 
@@ -32,12 +30,12 @@ class UserRepositoryIT {
     }
 
     @Test
-    void updateUser(){
+    void updateUser() {
         User user = getUser();
         userRepository.save(user);
         user.setName("TIMON");
 
-        userRepository.update(user);
+        userRepository.save(user);
 
         Optional<User> actualResult = userRepository.findById(user.getId());
         assertTrue(actualResult.isPresent());
@@ -45,7 +43,7 @@ class UserRepositoryIT {
     }
 
     @Test
-    void getAllUsers(){
+    void getAllUsers() {
         User user1 = getUser();
         userRepository.save(user1);
         User user2 = new User();
@@ -59,7 +57,7 @@ class UserRepositoryIT {
 
         List<User> actualResult = userRepository.findAll();
 
-        assertEquals(2,actualResult.size());
+        assertEquals(2, actualResult.size());
         assertThat(actualResult).containsExactlyInAnyOrder(user1, user2);
     }
 
@@ -84,5 +82,4 @@ class UserRepositoryIT {
         user.setAddress("Mazurova 4-56");
         return user;
     }
-
 }
