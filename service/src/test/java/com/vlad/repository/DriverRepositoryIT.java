@@ -1,4 +1,4 @@
-package com.vlad.repository.impl;
+package com.vlad.repository;
 
 import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @IT
@@ -43,7 +43,7 @@ class DriverRepositoryIT {
         driverRepository.save(driver);
         driver.setName("PUMBA");
 
-        driverRepository.update(driver);
+        driverRepository.save(driver);
 
         Optional<Driver> actualResult = driverRepository.findById(driver.getId());
         assertTrue(actualResult.isPresent());
@@ -97,5 +97,4 @@ class DriverRepositoryIT {
         user.setAddress("Mazurova 4-56");
         return user;
     }
-
 }

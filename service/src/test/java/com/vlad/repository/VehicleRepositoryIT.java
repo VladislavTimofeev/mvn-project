@@ -1,4 +1,4 @@
-package com.vlad.repository.impl;
+package com.vlad.repository;
 
 import com.vlad.annotation.IT;
 import com.vlad.dto.filter.VehicleFilterDto;
@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @IT
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ class VehicleRepositoryIT {
                 .model("ISUZU")
                 .build();
 
-        List<Vehicle> actualResult = vehicleRepository.getVehicleByFilter(filter);
+        List<Vehicle> actualResult = vehicleRepository.findAllByFilter(filter);
 
         assertEquals(vehicle1, actualResult.get(0));
     }
@@ -77,7 +77,7 @@ class VehicleRepositoryIT {
         vehicleRepository.save(vehicle);
         vehicle.setModel("FORD");
 
-        vehicleRepository.update(vehicle);
+        vehicleRepository.save(vehicle);
 
         Optional<Vehicle> actualResult = vehicleRepository.findById(vehicle.getId());
         assertTrue(actualResult.isPresent());
@@ -133,5 +133,4 @@ class VehicleRepositoryIT {
         user.setAddress("Mazurova 4-56");
         return user;
     }
-
 }
