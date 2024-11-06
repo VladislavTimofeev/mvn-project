@@ -1,5 +1,6 @@
 package com.vlad.repository;
 
+import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
@@ -8,7 +9,6 @@ import com.vlad.entity.Trip;
 import com.vlad.entity.TripStatus;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
-import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@IT
 @RequiredArgsConstructor
-class TripRepositoryIT extends IntegrationTestBase {
+class TripRepositoryIT {
 
     private final TripRepository tripRepository;
     private final RequestRepository requestRepository;

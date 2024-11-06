@@ -1,9 +1,9 @@
 package com.vlad.repository;
 
+import com.vlad.annotation.IT;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@IT
 @RequiredArgsConstructor
-class DriverRepositoryIT extends IntegrationTestBase {
+class DriverRepositoryIT {
 
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;

@@ -1,8 +1,8 @@
 package com.vlad.repository;
 
+import com.vlad.annotation.IT;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +12,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@IT
 @RequiredArgsConstructor
-class UserRepositoryIT extends IntegrationTestBase {
+class UserRepositoryIT {
 
     private final UserRepository userRepository;
 

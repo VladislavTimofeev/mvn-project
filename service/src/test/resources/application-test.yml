@@ -2,7 +2,7 @@ spring:
   datasource:
     username: test
     password: test
+    url: jdbc:tc:postgresql:13:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   jpa:
-    hibernate:
-      ddl-auto: update
     show-sql: true

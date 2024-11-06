@@ -1,11 +1,11 @@
 package com.vlad.repository;
 
+import com.vlad.annotation.IT;
 import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.repository.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@IT
 @RequiredArgsConstructor
-class RequestRepositoryIT extends IntegrationTestBase {
+class RequestRepositoryIT {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
