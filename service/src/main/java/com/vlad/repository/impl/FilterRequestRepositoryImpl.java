@@ -29,7 +29,6 @@ public class FilterRequestRepositoryImpl implements FilterRequestRepository {
         return new JPAQuery<>(entityManager)
                 .select(QRequest.request)
                 .from(QRequest.request)
-                .join(QRequest.request.carrier, QUser.user)
                 .where(predicate)
                 .fetch();
     }
