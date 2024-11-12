@@ -2,11 +2,13 @@ package com.vlad.http.controller;
 
 import com.vlad.annotation.IT;
 import com.vlad.dto.user.UserCreateEditDto;
+import com.vlad.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -17,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerIT {
 
     private final MockMvc mockMvc;
+    private final UserService userService;
 
     @Test
     void findAll() throws Exception {
@@ -31,7 +34,7 @@ class UserControllerIT {
         mockMvc.perform(get("/users/1"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("user/users/*"))
-                .andExpect(model().attributeExists("user"));
+                .andExpect(model().attributeExists("user/user"));
     }
 
     @Test
@@ -69,7 +72,8 @@ class UserControllerIT {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(post("/users/1/delete"))
+        when(userService.delete(1L)).thenReturn(true);
+        mockMvc.perform(post("/users/1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"));
     }
