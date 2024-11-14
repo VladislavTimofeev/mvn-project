@@ -17,17 +17,17 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
     public User map(UserCreateEditDto object) {
         User user = new User();
         copy(object, user);
-
         return user;
     }
 
-    public void copy(UserCreateEditDto object, User user) {
+    private void copy(UserCreateEditDto object, User user) {
         user.setUsername(object.getUsername());
-        user.setPassword(object.getPassword());
+        if (object.getPassword() != null && !object.getPassword().isEmpty()) {
+            user.setPassword(object.getPassword());
+        }
         user.setName(object.getName());
         user.setContactInfo(object.getContactInfo());
         user.setAddress(object.getAddress());
         user.setRole(object.getRole());
     }
-
 }

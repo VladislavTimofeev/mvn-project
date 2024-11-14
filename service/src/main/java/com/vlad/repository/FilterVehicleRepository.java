@@ -8,5 +8,4 @@ import java.util.List;
 public interface FilterVehicleRepository {
 
     List<Vehicle> findAllByFilter(VehicleFilterDto vehicleFilterDto);
-
 }
