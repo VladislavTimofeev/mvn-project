@@ -6,6 +6,3 @@ spring:
     url: jdbc:postgresql://localhost:5433/logistics
   jpa:
     open-in-view: false
-logging:
-  level:
-    root: info
