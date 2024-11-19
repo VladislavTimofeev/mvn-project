@@ -8,13 +8,9 @@ import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.history.Revisions;
-import org.springframework.test.annotation.Commit;
 
-import javax.swing.text.html.parser.Entity;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -50,10 +46,7 @@ class RequestRepositoryIT {
 
         Optional<Request> actualResult = requestRepository.findById(request.getId());
         assertEquals(actualResult.get().getStatus(), RequestStatus.COMPLETED);
-
         Revisions<Long, Request> revisions = requestRepository.findRevisions(request.getId());
-        System.out.println();
-
     }
 
     @Test
