@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,7 +26,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Request {
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+public class Request extends AuditingEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

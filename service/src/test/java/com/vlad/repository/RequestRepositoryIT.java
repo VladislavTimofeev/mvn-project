@@ -6,8 +6,10 @@ import com.vlad.entity.Request;
 import com.vlad.entity.RequestStatus;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.history.Revisions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,6 +28,26 @@ class RequestRepositoryIT {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
+
+    @Test
+    void checkAuditing() {
+        User customer = getCustomer();
+        userRepository.save(customer);
+        User carrier = getCarrier();
+        userRepository.save(carrier);
+        Request request = getRequest(customer, carrier);
+        requestRepository.save(request);
+        entityManager.flush();
+        request.setStatus(RequestStatus.COMPLETED);
+
+        requestRepository.saveAndFlush(request);
+        entityManager.clear();
+
+        Optional<Request> actualResult = requestRepository.findById(request.getId());
+        assertEquals(actualResult.get().getStatus(), RequestStatus.COMPLETED);
+        Revisions<Long, Request> revisions = requestRepository.findRevisions(request.getId());
+    }
 
     @Test
     void getRequestByFilter() {
