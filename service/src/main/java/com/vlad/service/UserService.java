@@ -30,9 +30,9 @@ public class UserService {
     public Page<UserReadDto> findAll(UserFilterDto userFilterDto, Pageable pageable) {
         Predicate predicate = QPredicate.builder()
                 .add(userFilterDto.getUsername(), QUser.user.username::eq)
-                .add(userFilterDto.getName(), QUser.user.name::eq)
+                .add(userFilterDto.getName(), QUser.user.name::containsIgnoreCase)
                 .add(userFilterDto.getRole(), QUser.user.role::eq)
-                .buildOr();
+                .buildAnd();
         return userRepository.findAll(predicate, pageable)
                 .map(userReadMapper::map);
     }

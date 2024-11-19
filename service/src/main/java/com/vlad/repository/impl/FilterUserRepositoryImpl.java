@@ -23,7 +23,7 @@ public class FilterUserRepositoryImpl implements FilterUserRepository {
                 .add(userFilterDto.getUsername(), QUser.user.username::eq)
                 .add(userFilterDto.getName(), QUser.user.name::eq)
                 .add(userFilterDto.getRole(), QUser.user.role::eq)
-                .buildOr();
+                .buildAnd();
         return new JPAQuery<User>(entityManager)
                 .select(QUser.user)
                 .from(QUser.user)

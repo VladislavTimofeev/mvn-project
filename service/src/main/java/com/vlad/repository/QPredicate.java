@@ -27,6 +27,13 @@ public class QPredicate {
         return this;
     }
 
+    public <T extends CharSequence> QPredicate add(T object, Function<T, Predicate> function) {
+        if (object != null && !object.isEmpty()) {  //StringUtils посмотреть добавить
+            predicates.add(function.apply(object));
+        }
+        return this;
+    }
+
     public Predicate buildAnd() {
         return Optional.ofNullable(ExpressionUtils.allOf(predicates))
                 .orElseGet(() -> Expressions.asBoolean(true).isTrue());
