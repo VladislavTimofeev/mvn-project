@@ -4,7 +4,5 @@ spring:
     username: postgres
     password: pass
     url: jdbc:postgresql://localhost:5433/logistics
-  mvc:
-    view:
-      prefix: /WEB-INF/jsp/
-      suffix: .jsp
+  jpa:
+    open-in-view: false
