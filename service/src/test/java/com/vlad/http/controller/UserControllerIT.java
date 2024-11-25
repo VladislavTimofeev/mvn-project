@@ -2,11 +2,22 @@ package com.vlad.http.controller;
 
 import com.vlad.annotation.IT;
 import com.vlad.dto.user.UserCreateEditDto;
+import com.vlad.entity.Role;
 import com.vlad.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,10 +31,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @IT
 @RequiredArgsConstructor
 @AutoConfigureMockMvc
+//@WithMockUser(username = "test@gmail.com", password = "test", authorities = {"ADMIN", "GUEST"})
 class UserControllerIT {
 
     private final MockMvc mockMvc;
     private final UserService userService;
+
+    @BeforeEach
+    void init() {
+        List<GrantedAuthority> roles = Arrays.asList(Role.ADMIN, Role.GUEST);
+        User testUSer = new User("test@gmail.com", "test", roles);
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(testUSer, testUSer.getPassword(), roles);
+
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authenticationToken);
+        SecurityContextHolder.setContext(securityContext);
+    }
 
     @Test
     void findAll() throws Exception {

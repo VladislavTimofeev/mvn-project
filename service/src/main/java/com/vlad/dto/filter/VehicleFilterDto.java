@@ -8,6 +8,9 @@ import lombok.Value;
 @Builder
 @AllArgsConstructor
 public class VehicleFilterDto {
+//    Long requestId;
+//    Long vehicleId;
+//    Long driverId;
     Integer palletCapacity;
     Boolean refrigerated;
     String model;
