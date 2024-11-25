@@ -1,8 +1,15 @@
 package com.vlad.entity;
 
-public enum Role {
+import org.springframework.security.core.GrantedAuthority;
+
+public enum Role implements GrantedAuthority {
     CUSTOMER,
     CARRIER,
     ADMIN,
-    GUEST
+    GUEST;
+
+    @Override
+    public String getAuthority() {
+        return name();
+    }
 }
