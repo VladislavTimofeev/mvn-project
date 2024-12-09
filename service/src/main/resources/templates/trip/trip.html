@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trip</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:insert="~{fragments :: header}"></div>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header text-center">
+            <h3>Trip Information</h3>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/trips/{tripId}/update(tripId=${trip.id})}" method="post">
+                <div class="mb-3">
+                    <label for="requestId" class="form-label">Request</label>
+                    <input id="requestId" type="text" name="requestId" class="form-control"
+                           th:value="${trip.request.id}">
+                </div>
+                <div class="mb-3">
+                    <label for="vehicleId" class="form-label">Vehicle</label>
+                    <input id="vehicleId" type="text" name="vehicleId" class="form-control"
+                           th:value="${trip.vehicle.id}">
+                </div>
+                <div class="mb-3">
+                    <label for="driverId" class="form-label">Driver</label>
+                    <input id="driverId" type="text" name="driverId" class="form-control" th:value="${trip.driver.id}">
+                </div>
+                <div class="mb-3">
+                    <label for="departureTime" class="form-label">Departure time</label>
+                    <input id="departureTime" type="date" name="departureTime" class="form-control"
+                           th:value="${trip.departureTime}">
+                </div>
+                <div class="mb-3">
+                    <label for="arrivalTime" class="form-label">Arrival time</label>
+                    <input id="arrivalTime" type="date" name="arrivalTime" class="form-control"
+                           th:value="${trip.arrivalTime}">
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <input id="status" type="text" name="status" class="form-control" th:value="${trip.status}">
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a th:href="@{/trips}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+            <form th:action="@{/trips/{tripId}/delete(tripId=${trip.id})}" method="post" class="mt-3">
+                <button type="submit" class="btn btn-danger">Remove trip</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

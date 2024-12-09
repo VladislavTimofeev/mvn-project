@@ -33,7 +33,7 @@ public class SecurityConfiguration {
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/admin/**").hasAuthority(ADMIN.getAuthority())
-                        .requestMatchers("/", "/login", "/login/**", "/users/registration", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/**", "/login", "/login/**", "/users/registration", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
@@ -41,7 +41,7 @@ public class SecurityConfiguration {
                         .logoutSuccessUrl("/"))
                 .formLogin(login -> login
                         .loginPage("/login")
-                        .defaultSuccessUrl("/users")
+                        .defaultSuccessUrl("/welcome")
                 )
                 .oauth2Login(config -> config
                         .loginPage("/login")

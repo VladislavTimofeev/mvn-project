@@ -31,13 +31,7 @@
             <input id="address" type="text" name="address" th:value="${user.address}" class="form-control">
         </div>
         <div class="mb-3">
-            <label class="form-label">Role</label><br>
-            <div th:each="role : ${roles}">
-                <div class="form-check form-check-inline">
-                    <input th:id="${role}" type="radio" name="role" th:value="${role}" th:checked="${role == user.role}" class="form-check-input">
-                    <label th:for="${role}" class="form-check-label" th:text="${role}">Role name</label>
-                </div>
-            </div>
+            <input type="hidden" name="role" value="GUEST">
         </div>
         <button type="submit" class="btn btn-primary">Register</button>
         <div th:if="${errors}" class="mt-3">

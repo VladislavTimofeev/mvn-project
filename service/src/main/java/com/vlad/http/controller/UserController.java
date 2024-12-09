@@ -11,10 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,7 +33,7 @@ public class UserController {
     @GetMapping("/registration")
     public String registration(Model model, @ModelAttribute UserCreateEditDto user) {
         model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
+        model.addAttribute("roles", Role.GUEST);
         return "user/registration";
     }
 
@@ -51,8 +47,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public String findById(@PathVariable("id") Long id, Model model, @CurrentSecurityContext SecurityContext securityContext,
-                           @AuthenticationPrincipal UserDetails userDetails) {
+    public String findById(@PathVariable("id") Long id, Model model) {
         return userService.findById(id)
                 .map(user -> {
                     model.addAttribute("user", user);
@@ -75,7 +70,6 @@ public class UserController {
         return "redirect:/login";
     }
 
-    //    @PutMapping("/{id}")
     @PostMapping("/{id}/update")
     public String update(@PathVariable("id") Long id, @ModelAttribute UserCreateEditDto user) {
         return userService.update(id, user)
@@ -83,9 +77,7 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    //    @DeleteMapping("/{id}")
     @PostMapping("/{id}/delete")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public String delete(@PathVariable("id") Long id) {
         if (!userService.delete(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create trip</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="~{fragments :: header}"></div>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Create trip</h2>
+    <form th:action="@{/trips}" method="post">
+        <div class="mb-3">
+            <label for="requestId" class="form-label">Request</label>
+            <input id="requestId" type="text" name="requestId" th:value="${trip.requestId}" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="vehicleId" class="form-label">Vehicle</label>
+            <input id="vehicleId" type="text" name="vehicleId" th:value="${trip.vehicleId}" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="driverId" class="form-label">Driver</label>
+            <input id="driverId" type="text" name="driverId" th:value="${trip.driverId}" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="departureTime" class="form-label">Departure time</label>
+            <input id="departureTime" type="date" name="departureTime" th:value="${trip.departureTime}"
+                   class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="arrivalTime" class="form-label">Arrival time</label>
+            <input id="arrivalTime" type="date" name="arrivalTime" th:value="${trip.arrivalTime}" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <input id="status" type="text" name="status" value="PENDING" class="form-control" readonly>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a th:href="@{/trips}" class="btn btn-secondary">Cancel</a>
+        </div>
+        <div th:if="${errors}" class="mt-3">
+            <div class="alert alert-danger">
+                <p th:each="error : ${errors}" th:text="${error.defaultMessage}">Error message</p>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

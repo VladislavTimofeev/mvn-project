@@ -16,6 +16,7 @@ public class TripReadMapper implements Mapper<Trip, TripReadDto> {
     @Override
     public TripReadDto map(Trip object) {
         return new TripReadDto(
+                object.getId(),
                 requestReadMapper.map(object.getRequest()),
                 vehicleReadMapper.map(object.getVehicle()),
                 driverReadMapper.map(object.getDriver()),
