@@ -17,6 +17,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <span sec:authentication="name">Username</span>
+            <div th:insert="~{fragments :: locale}"></div>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -28,6 +29,15 @@
                     </li>
                 </ul>
             </div>
+        </div>
+        <div th:fragment="locale">
+            <form action="">
+                <select name="lang" onchange="this.form.submit()">
+                    <option></option>
+                    <option value="en">EN</option>
+                    <option value="ru">RU</option>
+                </select>
+            </form>
         </div>
     </nav>
 </div>

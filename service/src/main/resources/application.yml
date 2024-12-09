@@ -22,3 +22,5 @@ spring:
               - openid
               - profile
               - email
+  messages:
+    basename: messages
