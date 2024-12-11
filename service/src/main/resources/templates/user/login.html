@@ -20,11 +20,11 @@
             </div>
             <div class="mb-3">
                 <label for="username" class="form-label"><span th:text="#{login.username}">Username:</span></label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
+                <input type="text" id="username" name="username" class="form-control" th:placeholder="#{login.enterUsername}" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label"><span th:text="#{login.password}">Password:</span></label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" class="form-control" th:placeholder="#{login.enterPassword}" required>
             </div>
             <button type="submit" class="btn btn-primary w-100"><span th:text="#{login.button}">Login</span></button>
         </form>
