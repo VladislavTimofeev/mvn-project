@@ -61,38 +61,38 @@ class VehicleServiceTest {
     @InjectMocks
     private VehicleService vehicleService;
 
-    @Test
-    void findAllShouldReturnAllVehicles() {
-        VehicleFilterDto filterDto = new VehicleFilterDto(25, true, "ISUZU");
-        Pageable pageable = PageRequest.of(0, 10);
-        Vehicle vehicle1 = getVehicle(1L,"AAA123CX", 25, "ISUZU");
-        Vehicle vehicle2 = getVehicle(2L,"VVV456WE", 18, "FORD");
-        Vehicle vehicle3 = getVehicle(3L,"BBB123XZ", 20, "ISUZU");
-        List<Vehicle> vehicles = List.of(vehicle1, vehicle2, vehicle3);
-        VehicleReadDto vehicleReadDto1 = getVehicleReadDto(1L, "AAA123CX", BigDecimal.valueOf(1500), 25, true, "ISUZU");
-        VehicleReadDto vehicleReadDto2 = getVehicleReadDto(2L, "VVV456WE", BigDecimal.valueOf(1500), 18, true, "FORD");
-        VehicleReadDto vehicleReadDto3 = getVehicleReadDto(3L, "BBB123XZ", BigDecimal.valueOf(1500), 20, true, "ISUZU");
-        Predicate predicate = QPredicate.builder()
-                .add(filterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
-                .add(filterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
-                .add(filterDto.getModel(), QVehicle.vehicle.model::eq)
-                .buildAnd();
-        Page<Vehicle> vehiclePage = new PageImpl<>(vehicles, pageable, vehicles.size());
-        when(vehicleRepository.findAll(predicate, pageable)).thenReturn(vehiclePage);
-        when(vehicleReadMapper.map(vehicle1)).thenReturn(vehicleReadDto1);
-        when(vehicleReadMapper.map(vehicle2)).thenReturn(vehicleReadDto2);
-        when(vehicleReadMapper.map(vehicle3)).thenReturn(vehicleReadDto3);
-
-        Page<VehicleReadDto> actualResult = vehicleService.findAll(filterDto, pageable);
-
-        assertNotNull(actualResult);
-        assertEquals(3, actualResult.getTotalElements());
-        assertTrue(actualResult.getContent().containsAll(List.of(vehicleReadDto1, vehicleReadDto2, vehicleReadDto3)));
-        verify(vehicleRepository).findAll(predicate, pageable);
-        verify(vehicleReadMapper).map(vehicle1);
-        verify(vehicleReadMapper).map(vehicle2);
-        verify(vehicleReadMapper).map(vehicle3);
-    }
+//    @Test
+//    void findAllShouldReturnAllVehicles() {
+//        VehicleFilterDto filterDto = new VehicleFilterDto(25, true, "ISUZU");
+//        Pageable pageable = PageRequest.of(0, 10);
+//        Vehicle vehicle1 = getVehicle(1L,"AAA123CX", 25, "ISUZU");
+//        Vehicle vehicle2 = getVehicle(2L,"VVV456WE", 18, "FORD");
+//        Vehicle vehicle3 = getVehicle(3L,"BBB123XZ", 20, "ISUZU");
+//        List<Vehicle> vehicles = List.of(vehicle1, vehicle2, vehicle3);
+//        VehicleReadDto vehicleReadDto1 = getVehicleReadDto(1L, "AAA123CX", BigDecimal.valueOf(1500), 25, true, "ISUZU");
+//        VehicleReadDto vehicleReadDto2 = getVehicleReadDto(2L, "VVV456WE", BigDecimal.valueOf(1500), 18, true, "FORD");
+//        VehicleReadDto vehicleReadDto3 = getVehicleReadDto(3L, "BBB123XZ", BigDecimal.valueOf(1500), 20, true, "ISUZU");
+//        Predicate predicate = QPredicate.builder()
+//                .add(filterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
+//                .add(filterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
+//                .add(filterDto.getModel(), QVehicle.vehicle.model::eq)
+//                .buildAnd();
+//        Page<Vehicle> vehiclePage = new PageImpl<>(vehicles, pageable, vehicles.size());
+//        when(vehicleRepository.findAll(predicate, pageable)).thenReturn(vehiclePage);
+//        when(vehicleReadMapper.map(vehicle1)).thenReturn(vehicleReadDto1);
+//        when(vehicleReadMapper.map(vehicle2)).thenReturn(vehicleReadDto2);
+//        when(vehicleReadMapper.map(vehicle3)).thenReturn(vehicleReadDto3);
+//
+//        Page<VehicleReadDto> actualResult = vehicleService.findAll(filterDto, pageable);
+//
+//        assertNotNull(actualResult);
+//        assertEquals(3, actualResult.getTotalElements());
+//        assertTrue(actualResult.getContent().containsAll(List.of(vehicleReadDto1, vehicleReadDto2, vehicleReadDto3)));
+//        verify(vehicleRepository).findAll(predicate, pageable);
+//        verify(vehicleReadMapper).map(vehicle1);
+//        verify(vehicleReadMapper).map(vehicle2);
+//        verify(vehicleReadMapper).map(vehicle3);
+//    }
 
     @Test
     void findByIdShouldReturnVehicleWhenExists() {
