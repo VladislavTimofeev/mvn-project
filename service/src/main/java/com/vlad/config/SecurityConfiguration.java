@@ -17,7 +17,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static com.vlad.entity.Role.ADMIN;
+import static com.vlad.entity.Role.CARRIER;
+import static com.vlad.entity.Role.CUSTOMER;
 
 
 @Configuration
@@ -32,8 +33,11 @@ public class SecurityConfiguration {
         return http
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/admin/**").hasAuthority(ADMIN.getAuthority())
-                        .requestMatchers("/**", "/login", "/login/**", "/users/registration", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/login/**", "/users/registration", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/drivers/create").hasAuthority(CARRIER.getAuthority())
+                        .requestMatchers("/vehicles/create").hasAuthority(CARRIER.getAuthority())
+                        .requestMatchers("trips/create").hasAuthority(CARRIER.getAuthority())
+                        .requestMatchers("/requests/create").hasAuthority(CUSTOMER.getAuthority())
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout

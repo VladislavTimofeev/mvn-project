@@ -20,11 +20,13 @@
                 <p>You have successfully logged in.</p>
                 <!-- Кнопки перехода на другие страницы -->
                 <div class="mb-3">
-                    <a th:href="@{/vehicles}" class="btn btn-primary">Find transport</a>
-                    <a th:href="@{/requests}" class="btn btn-primary">Find freight</a>
-                    <a th:href="@{/users}" class="btn btn-primary">Show all users</a>
-                    <a th:href="@{/drivers}" class="btn btn-primary">Show all drivers</a>
-                    <a th:href="@{/profile}" class="btn btn-info">Go to Profile</a>
+                    <a th:href="@{/vehicles}" class="btn btn-primary">Find transports</a>
+                    <a th:href="@{/requests}" class="btn btn-primary">Find requests</a>
+                    <a th:href="@{/users}" class="btn btn-primary" sec:authorize="hasAuthority('ADMIN')">Find all users</a>
+                    <a th:href="@{/drivers}" class="btn btn-primary" sec:authorize="hasAuthority('ADMIN') or
+                    hasAuthority('CARRIER')">Find all drivers</a>
+                    <a th:href="@{/trips}" class="btn btn-primary" sec:authorize="hasAuthority('ADMIN') or
+                    hasAuthority('CARRIER')">Find trips</a>
                 </div>
             </div>
         </div>

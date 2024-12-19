@@ -1,6 +1,7 @@
 package com.vlad.mapper;
 
 import com.vlad.dto.user.UserCreateEditDto;
+import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +40,10 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
         user.setName(object.getName());
         user.setContactInfo(object.getContactInfo());
         user.setAddress(object.getAddress());
-        user.setRole(object.getRole());
+        if (user.getRole() == null) {
+            user.setRole(Role.GUEST);
+        } else {
+            user.setRole(object.getRole());
+        }
     }
 }

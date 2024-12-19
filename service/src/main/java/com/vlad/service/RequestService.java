@@ -53,7 +53,8 @@ public class RequestService {
 
     @Transactional
     public Optional<RequestReadDto> update(Long id, RequestCreateEditDto requestCreateEditDto) {
-        return requestRepository.findById(id)
+//        return requestRepository.findById(id)
+        return requestRepository.findByIdWithLock(id)
                 .map(entity -> requestCreateEditMapper.map(requestCreateEditDto, entity))
                 .map(requestRepository::saveAndFlush)
                 .map(requestReadMapper::map);
