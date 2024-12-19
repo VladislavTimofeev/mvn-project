@@ -6,3 +6,19 @@ spring:
     url: jdbc:postgresql://localhost:5433/logistics
   jpa:
     open-in-view: false
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: Ov23lidkYctSyGBWNC0H
+            client-secret: 18e638dce206b6db7d4cbeabf98e81846bf9dcb2
+            redirect-uri: http://localhost:8080/login/oauth2/code/github
+            scope:
+              - openid
+              - profile
+              - email

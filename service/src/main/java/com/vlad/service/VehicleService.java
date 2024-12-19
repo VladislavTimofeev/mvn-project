@@ -31,6 +31,8 @@ public class VehicleService {
 
     public Page<VehicleReadDto> findAll(VehicleFilterDto vehicleFilterDto, Pageable pageable) {
         Predicate predicate = QPredicate.builder()
+                .add(vehicleFilterDto.getLicensePlate(), QVehicle.vehicle.licensePlate::eq)
+                .add(vehicleFilterDto.getCapacity(), QVehicle.vehicle.capacity::eq)
                 .add(vehicleFilterDto.getPalletCapacity(), QVehicle.vehicle.palletCapacity::eq)
                 .add(vehicleFilterDto.getRefrigerated(), QVehicle.vehicle.refrigerated::eq)
                 .add(vehicleFilterDto.getModel(), QVehicle.vehicle.model::eq)

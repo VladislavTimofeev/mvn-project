@@ -10,6 +10,7 @@ import java.time.LocalDate;
 
 @Value
 public class TripReadDto {
+    Long id;
     RequestReadDto request;
     VehicleReadDto vehicle;
     DriverReadDto driver;

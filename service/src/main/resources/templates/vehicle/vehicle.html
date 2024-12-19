@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:insert="~{fragments :: header}"></div>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header text-center">
+            <h3>Vehicle Information</h3>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/vehicles/{vehicleId}/update(vehicleId=${vehicle.id})}" method="post">
+                <div class="mb-3">
+                    <label for="carrierId" class="form-label">Carrier</label>
+                    <input id="carrierId" type="text" name="carrierId" class="form-control" th:value="${vehicle.carrier.id}">
+                </div>
+                <div class="mb-3">
+                    <label for="licensePlate" class="form-label">License plate</label>
+                    <input id="licensePlate" type="text" name="licensePlate" class="form-control" th:value="${vehicle.licensePlate}">
+                </div>
+                <div class="mb-3">
+                    <label for="capacity" class="form-label">Capacity</label>
+                    <input id="capacity" type="text" name="capacity" class="form-control" th:value="${vehicle.capacity}">
+                </div>
+                <div class="mb-3">
+                    <label for="palletCapacity" class="form-label">Pallet amount</label>
+                    <input id="palletCapacity" type="text" name="palletCapacity" class="form-control" th:value="${vehicle.palletCapacity}">
+                </div>
+                <div class="mb-3">
+                    <label for="refrigerated" class="form-label">Refrigerated</label>
+                    <input id="refrigerated" type="text" name="refrigerated" class="form-control" th:value="${vehicle.refrigerated}">
+                </div>
+                <div class="mb-3">
+                    <label for="model" class="form-label">Model</label>
+                    <input id="model" type="text" name="model" class="form-control" th:value="${vehicle.model}">
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a th:href="@{/vehicles}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+            <form th:action="@{/vehicles/{vehicleId}/delete(vehicleId=${vehicle.id})}" method="post" class="mt-3">
+                <button type="submit" class="btn btn-danger">Remove vehicle</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
