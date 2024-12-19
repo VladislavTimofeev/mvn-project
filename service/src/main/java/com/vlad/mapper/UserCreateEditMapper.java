@@ -40,6 +40,10 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
         user.setName(object.getName());
         user.setContactInfo(object.getContactInfo());
         user.setAddress(object.getAddress());
-        user.setRole(Role.GUEST);
+        if (user.getRole() == null) {
+            user.setRole(Role.GUEST);
+        } else {
+            user.setRole(object.getRole());
+        }
     }
 }
