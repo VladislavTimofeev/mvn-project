@@ -46,7 +46,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public String findById(@PathVariable("id") Long id, Model model) {
         return userService.findById(id)
                 .map(user -> {

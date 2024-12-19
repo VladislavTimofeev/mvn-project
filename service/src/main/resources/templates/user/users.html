@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>Users</title>
@@ -30,6 +31,10 @@
         </div>
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+        <div class="d-flex justify-content-end">
+            <a th:href="@{/users/registration}" class="btn btn-primary" sec:authorize="hasAuthority('ADMIN')">
+                Create new user</a>
         </div>
     </form>
 
