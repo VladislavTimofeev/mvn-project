@@ -1,15 +1,20 @@
 package com.vlad.service;
 
+import com.querydsl.core.types.Predicate;
+import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.dto.request.RequestCreateEditDto;
 import com.vlad.dto.request.RequestReadDto;
+import com.vlad.entity.QRequest;
 import com.vlad.mapper.RequestCreateEditMapper;
 import com.vlad.mapper.RequestReadMapper;
+import com.vlad.repository.QPredicate;
 import com.vlad.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,10 +26,15 @@ public class RequestService {
     private final RequestReadMapper requestReadMapper;
     private final RequestCreateEditMapper requestCreateEditMapper;
 
-    public List<RequestReadDto> findAll() {
-        return requestRepository.findAll().stream()
-                .map(requestReadMapper::map)
-                .toList();
+    public Page<RequestReadDto> findAll(RequestFilterDto requestFilterDto, Pageable pageable) {
+        Predicate predicate = QPredicate.builder()
+                .add(requestFilterDto.getStatus(), QRequest.request.status::eq)
+                .add(requestFilterDto.getPickupAddress(), QRequest.request.pickupAddress::eq)
+                .add(requestFilterDto.getDeliveryAddress(), QRequest.request.deliveryAddress::eq)
+                .add(requestFilterDto.getCreationDate(), QRequest.request.creationDate::eq)
+                .buildAnd();
+        return requestRepository.findAll(predicate, pageable)
+                .map(requestReadMapper::map);
     }
 
     public Optional<RequestReadDto> findById(Long id) {
@@ -43,8 +53,9 @@ public class RequestService {
 
     @Transactional
     public Optional<RequestReadDto> update(Long id, RequestCreateEditDto requestCreateEditDto) {
-        return requestRepository.findById(id)
-                .map(entity->requestCreateEditMapper.map(requestCreateEditDto,entity))
+//        return requestRepository.findById(id)
+        return requestRepository.findByIdWithLock(id)
+                .map(entity -> requestCreateEditMapper.map(requestCreateEditDto, entity))
                 .map(requestRepository::saveAndFlush)
                 .map(requestReadMapper::map);
     }

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicles</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div th:insert="~{fragments :: header}"></div>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Vehicles</h2>
+
+    <!-- Форма фильтрации -->
+    <form action="/vehicles" method="get">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="licensePlate" class="form-label">License Plate</label>
+                <input id="licensePlate" type="text" name="licensePlate" th:value="${filter.licensePlate}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="capacity" class="form-label">Capacity</label>
+                <input id="capacity" type="text" name="capacity" th:value="${filter.capacity}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="palletCapacity" class="form-label">Pallet Amount</label>
+                <input id="palletCapacity" type="text" name="palletCapacity" th:value="${filter.palletCapacity}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="refrigerated" class="form-label">Refrigerated</label>
+                <input id="refrigerated" type="text" name="refrigerated" th:value="${filter.refrigerated}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="model" class="form-label">Model</label>
+                <input id="model" type="text" name="model" th:value="${filter.model}" class="form-control">
+            </div>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+        <div class="d-flex justify-content-end">
+            <a th:href="@{/vehicles/create}" class="btn btn-primary" sec:authorize="!hasAuthority('GUEST') and !hasAuthority('CUSTOMER')">Create new vehicle</a>
+        </div>
+    </form>
+
+    <!-- Таблица транспортных средств -->
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>License Plate</th>
+            <th>Capacity</th>
+            <th>Pallet Amount</th>
+            <th>Refrigerated</th>
+            <th>Model</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="vehicle : ${vehicles.content}">
+            <td th:text="${vehicle.id}">1</td>
+            <td th:text="${vehicle.licensePlate}">AB1234</td>
+            <td th:text="${vehicle.capacity}">5000</td>
+            <td th:text="${vehicle.palletCapacity}">25</td>
+            <td th:text="${vehicle.refrigerated}">Yes</td>
+            <td th:text="${vehicle.model}">Volvo FH</td>
+            <td>
+                <!-- Добавьте сюда кнопку для просмотра, если требуется -->
+                <a th:href="@{'/vehicles/' + ${vehicle.id}}" class="btn btn-info btn-sm"
+                   sec:authorize="!hasAuthority('GUEST') and !hasAuthority('CUSTOMER')">View</a>
+                <form th:action="@{'/vehicles/' + ${vehicle.id} + '/delete'}" method="post" class="d-inline"
+                      sec:authorize="!hasAuthority('GUEST') and !hasAuthority('CUSTOMER')">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${vehicles.content.size() == 0}">
+            <td colspan="7" class="text-center">No vehicles found</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Пагинация -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${vehicles.metadata.page == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{'/vehicles?page=' + (${vehicles.metadata.page} - 1) + '&size=' + ${vehicles.metadata.size}}">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, vehicles.metadata.totalPages - 1)}"
+                th:classappend="${i == vehicles.metadata.page} ? 'active'">
+                <a class="page-link" th:href="@{'/vehicles?page=' + ${i} + '&size=' + ${vehicles.metadata.size}}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${vehicles.metadata.page + 1 >= vehicles.metadata.totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{'/vehicles?page=' + (${vehicles.metadata.page} + 1) + '&size=' + ${vehicles.metadata.size}}">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>
