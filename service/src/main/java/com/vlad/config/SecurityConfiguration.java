@@ -2,7 +2,7 @@ package com.vlad.config;
 
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.entity.Role;
-import com.vlad.service.UserService;
+import com.vlad.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ import static com.vlad.entity.Role.CUSTOMER;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -64,7 +64,7 @@ public class SecurityConfiguration {
             }
             UserDetails userDetails;
             try {
-                userDetails = userService.loadUserByUsername(email);
+                userDetails = userServiceImpl.loadUserByUsername(email);
             } catch (UsernameNotFoundException e) {
                 UserCreateEditDto userCreateEditDto = new UserCreateEditDto(
                         email,
@@ -74,8 +74,8 @@ public class SecurityConfiguration {
                         oidcUser.getAddress().toString(),
                         Role.GUEST
                 );
-                userService.save(userCreateEditDto);
-                userDetails = userService.loadUserByUsername(email);
+                userServiceImpl.save(userCreateEditDto);
+                userDetails = userServiceImpl.loadUserByUsername(email);
             }
             return new DefaultOidcUser(
                     userDetails.getAuthorities(),

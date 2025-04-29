@@ -1,13 +1,10 @@
 package com.vlad.service;
 
-import com.querydsl.core.types.Predicate;
-import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
-import com.vlad.entity.QVehicle;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
@@ -15,21 +12,16 @@ import com.vlad.mapper.UserCreateEditMapper;
 import com.vlad.mapper.VehicleCreateMapper;
 import com.vlad.mapper.VehicleEditMapper;
 import com.vlad.mapper.VehicleReadMapper;
-import com.vlad.repository.QPredicate;
 import com.vlad.repository.VehicleRepository;
+import com.vlad.service.impl.VehicleServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-class VehicleServiceTest {
+class VehicleServiceImplTest {
 
     @Mock
     private UserCreateEditMapper userCreateEditMapper;
@@ -59,7 +51,7 @@ class VehicleServiceTest {
     @Mock
     private VehicleEditMapper vehicleEditMapper;
     @InjectMocks
-    private VehicleService vehicleService;
+    private VehicleServiceImpl vehicleServiceImpl;
 
 //    @Test
 //    void findAllShouldReturnAllVehicles() {
@@ -101,7 +93,7 @@ class VehicleServiceTest {
         doReturn(Optional.of(vehicle)).when(vehicleRepository).findById(vehicle.getId());
         doReturn(vehicleReadDto1).when(vehicleReadMapper).map(vehicle);
 
-        Optional<VehicleReadDto> actualResult = vehicleService.findById(vehicle.getId());
+        Optional<VehicleReadDto> actualResult = vehicleServiceImpl.findById(vehicle.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(vehicleReadDto1);
@@ -114,7 +106,7 @@ class VehicleServiceTest {
         Vehicle vehicle = getVehicle(1L,"AAA123CX", 25, "ISUZU");
         when(vehicleRepository.findById(vehicle.getId())).thenReturn(Optional.empty());
 
-        Optional<VehicleReadDto> actualResult = vehicleService.findById(vehicle.getId());
+        Optional<VehicleReadDto> actualResult = vehicleServiceImpl.findById(vehicle.getId());
 
         assertThat(actualResult).isNotPresent();
         verify(vehicleRepository, times(1)).findById(vehicle.getId());
@@ -130,7 +122,7 @@ class VehicleServiceTest {
         when(vehicleRepository.save(vehicle)).thenReturn(vehicle);
         when(vehicleReadMapper.map(vehicle)).thenReturn(vehicleReadDto);
 
-        VehicleReadDto actualResult = vehicleService.save(vehicleCreateDto);
+        VehicleReadDto actualResult = vehicleServiceImpl.save(vehicleCreateDto);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isEqualTo(vehicleReadDto.getId());
@@ -152,7 +144,7 @@ class VehicleServiceTest {
         when(vehicleRepository.saveAndFlush(updatedVehicle)).thenReturn(updatedVehicle);
         when(vehicleReadMapper.map(updatedVehicle)).thenReturn(expectedVehicleReadDto);
 
-        Optional<VehicleReadDto> actualResult = vehicleService.update(1L, vehicleEditDto);
+        Optional<VehicleReadDto> actualResult = vehicleServiceImpl.update(1L, vehicleEditDto);
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedVehicleReadDto);
@@ -167,7 +159,7 @@ class VehicleServiceTest {
         Vehicle vehicle = getVehicle(1L,"AAA123CX", 25, "ISUZU");
         when(vehicleRepository.findById(vehicle.getId())).thenReturn(Optional.of(vehicle));
 
-        boolean actualResult = vehicleService.delete(vehicle.getId());
+        boolean actualResult = vehicleServiceImpl.delete(vehicle.getId());
 
         assertThat(actualResult).isTrue();
         verify(vehicleRepository, times(1)).findById(vehicle.getId());
@@ -180,7 +172,7 @@ class VehicleServiceTest {
         Vehicle vehicle = getVehicle(1L,"AAA123CX", 25, "ISUZU");
         when(vehicleRepository.findById(vehicle.getId())).thenReturn(Optional.empty());
 
-        boolean actualResult = vehicleService.delete(vehicle.getId());
+        boolean actualResult = vehicleServiceImpl.delete(vehicle.getId());
 
         assertThat(actualResult).isFalse();
         verify(vehicleRepository, times(1)).findById(vehicle.getId());

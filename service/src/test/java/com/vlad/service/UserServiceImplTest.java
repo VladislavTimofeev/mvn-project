@@ -7,6 +7,7 @@ import com.vlad.entity.User;
 import com.vlad.mapper.UserCreateEditMapper;
 import com.vlad.mapper.UserReadMapper;
 import com.vlad.repository.UserRepository;
+import com.vlad.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-class UserServiceTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -38,7 +39,7 @@ class UserServiceTest {
     @Mock
     private UserReadMapper userReadMapper;
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Test
     void findAll() {
@@ -59,7 +60,7 @@ class UserServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userReadMapper.map(user)).thenReturn(userReadDto);
 
-        Optional<UserReadDto> actualResult = userService.findById(user.getId());
+        Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(userReadDto);
@@ -80,7 +81,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        Optional<UserReadDto> actualResult = userService.findById(user.getId());
+        Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
 
         assertThat(actualResult).isNotPresent();
         verify(userRepository, times(1)).findById(user.getId());
@@ -104,7 +105,7 @@ class UserServiceTest {
         when(userRepository.save(user)).thenReturn(user);
         when(userReadMapper.map(user)).thenReturn(userReadDto);
 
-        UserReadDto actualResult = userService.save(userCreateEditDto);
+        UserReadDto actualResult = userServiceImpl.save(userCreateEditDto);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isEqualTo(user.getId());
@@ -142,7 +143,7 @@ class UserServiceTest {
         when(userRepository.saveAndFlush(updatedUser)).thenReturn(updatedUser);
         when(userReadMapper.map(updatedUser)).thenReturn(expectedUserReadDto);
 
-        Optional<UserReadDto> actualResult = userService.update(1L, userCreateEditDto);
+        Optional<UserReadDto> actualResult = userServiceImpl.update(1L, userCreateEditDto);
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedUserReadDto);
@@ -164,7 +165,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        boolean actualResult = userService.delete(user.getId());
+        boolean actualResult = userServiceImpl.delete(user.getId());
 
         assertThat(actualResult).isTrue();
         verify(userRepository, times(1)).findById(user.getId());
@@ -184,7 +185,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        boolean actualResult = userService.delete(user.getId());
+        boolean actualResult = userServiceImpl.delete(user.getId());
 
         assertThat(actualResult).isFalse();
         verify(userRepository, times(1)).findById(user.getId());
@@ -207,7 +208,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
 
-        UserDetails userDetails = userService.loadUserByUsername(username);
+        UserDetails userDetails = userServiceImpl.loadUserByUsername(username);
 
         assertNotNull(userDetails, "UserDetails не должен быть null");
         assertEquals(username, userDetails.getUsername());
