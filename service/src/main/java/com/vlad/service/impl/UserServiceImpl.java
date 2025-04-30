@@ -5,8 +5,7 @@ import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.QUser;
-import com.vlad.mapper.UserCreateEditMapper;
-import com.vlad.mapper.UserReadMapper;
+import com.vlad.mapper.UserMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.UserRepository;
 import com.vlad.service.UserService;
@@ -30,8 +29,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserRepository userRepository;
-    private final UserReadMapper userReadMapper;
-    private final UserCreateEditMapper userCreateEditMapper;
+    private final UserMapper userMapper;
 
     @Override
     public Page<UserReadDto> findAll(UserFilterDto userFilterDto, Pageable pageable) {
@@ -41,29 +39,29 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                 .add(userFilterDto.getRole(), QUser.user.role::eq)
                 .buildAnd();
         return userRepository.findAll(predicate, pageable)
-                .map(userReadMapper::map);
+                .map(userMapper::toDto);
     }
 
     @Override
     public List<UserReadDto> findAll() {
         return userRepository.findAll().stream()
-                .map(userReadMapper::map)
+                .map(userMapper::toDto)
                 .toList();
     }
 
     @Override
     public Optional<UserReadDto> findById(Long id) {
         return userRepository.findById(id)
-                .map(userReadMapper::map);
+                .map(userMapper::toDto);
     }
 
     @Override
     @Transactional
     public UserReadDto save(UserCreateEditDto userCreateEditDto) {
         return Optional.of(userCreateEditDto)
-                .map(userCreateEditMapper::map)
+                .map(user -> userMapper.toEntity(userCreateEditDto))
                 .map(userRepository::save)
-                .map(userReadMapper::map)
+                .map(userMapper::toDto)
                 .orElseThrow();
     }
 
@@ -71,9 +69,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Transactional
     public Optional<UserReadDto> update(Long id, UserCreateEditDto userCreateEditDto) {
         return userRepository.findById(id)
-                .map(entity -> userCreateEditMapper.map(userCreateEditDto, entity))
-                .map(userRepository::saveAndFlush)
-                .map(userReadMapper::map);
+                .map(existingUser -> {
+                    userMapper.updateEntityFromDto(userCreateEditDto, existingUser);
+                    return userRepository.saveAndFlush(existingUser);
+                })
+                .map(userMapper::toDto);
     }
 
     @Override

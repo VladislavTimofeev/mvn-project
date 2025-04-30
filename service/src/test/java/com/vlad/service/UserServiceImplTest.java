@@ -4,8 +4,7 @@ import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.mapper.UserCreateEditMapper;
-import com.vlad.mapper.UserReadMapper;
+import com.vlad.mapper.UserMapper;
 import com.vlad.repository.UserRepository;
 import com.vlad.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -35,15 +34,9 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private UserCreateEditMapper userCreateEditMapper;
-    @Mock
-    private UserReadMapper userReadMapper;
+    private UserMapper userMapper;
     @InjectMocks
     private UserServiceImpl userServiceImpl;
-
-    @Test
-    void findAll() {
-    }
 
     @Test
     void findByIdShouldReturnUserWhenExists() {
@@ -58,14 +51,14 @@ class UserServiceImplTest {
                 .build();
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(userReadMapper.map(user)).thenReturn(userReadDto);
+        when(userMapper.toDto(user)).thenReturn(userReadDto);
 
         Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(userReadDto);
         verify(userRepository, times(1)).findById(user.getId());
-        verify(userReadMapper, times(1)).map(user);
+        verify(userMapper, times(1)).toDto(user);
     }
 
     @Test
@@ -85,7 +78,7 @@ class UserServiceImplTest {
 
         assertThat(actualResult).isNotPresent();
         verify(userRepository, times(1)).findById(user.getId());
-        verifyNoMoreInteractions(userReadMapper);
+        verifyNoMoreInteractions(userMapper);
     }
 
     @Test
@@ -101,9 +94,9 @@ class UserServiceImplTest {
                 .role(Role.ADMIN)
                 .build();
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
-        when(userCreateEditMapper.map(userCreateEditDto)).thenReturn(user);
+        when(userMapper.toEntity(userCreateEditDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(user);
-        when(userReadMapper.map(user)).thenReturn(userReadDto);
+        when(userMapper.toDto(user)).thenReturn(userReadDto);
 
         UserReadDto actualResult = userServiceImpl.save(userCreateEditDto);
 
@@ -111,9 +104,9 @@ class UserServiceImplTest {
         assertThat(actualResult.getId()).isEqualTo(user.getId());
         assertThat(actualResult.getUsername()).isEqualTo(user.getUsername());
         assertThat(actualResult.getRole()).isEqualTo(user.getRole());
-        verify(userCreateEditMapper, times(1)).map(userCreateEditDto);
+        verify(userMapper, times(1)).toEntity(userCreateEditDto);
         verify(userRepository, times(1)).save(user);
-        verify(userReadMapper, times(1)).map(user);
+        verify(userMapper, times(1)).toDto(user);
     }
 
     @Test
@@ -128,29 +121,19 @@ class UserServiceImplTest {
                 .address("Pushkina 31-2")
                 .role(Role.ADMIN)
                 .build();
-        User updatedUser = User.builder()
-                .id(1L)
-                .username("masha@gmail.com")
-                .password("123gg")
-                .name("Maria")
-                .contactInfo("77889900")
-                .address("Pushkina 66-1")
-                .role(Role.CUSTOMER)
-                .build();
         UserReadDto expectedUserReadDto = new UserReadDto(1L, "masha@gmail.com", "Maria", "77889900", "Pushkina 66-1", Role.CUSTOMER);
         when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
-        when(userCreateEditMapper.map(userCreateEditDto, existingUser)).thenReturn(updatedUser);
-        when(userRepository.saveAndFlush(updatedUser)).thenReturn(updatedUser);
-        when(userReadMapper.map(updatedUser)).thenReturn(expectedUserReadDto);
+        when(userRepository.saveAndFlush(existingUser)).thenReturn(existingUser);
+        when(userMapper.toDto(existingUser)).thenReturn(expectedUserReadDto);
 
         Optional<UserReadDto> actualResult = userServiceImpl.update(1L, userCreateEditDto);
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedUserReadDto);
         verify(userRepository, times(1)).findById(existingUser.getId());
-        verify(userCreateEditMapper, times(1)).map(userCreateEditDto, existingUser);
-        verify(userRepository, times(1)).saveAndFlush(updatedUser);
-        verify(userReadMapper, times(1)).map(updatedUser);
+        verify(userRepository, times(1)).saveAndFlush(existingUser);
+        verify(userMapper, times(1)).updateEntityFromDto(userCreateEditDto, existingUser);
+        verify(userMapper).toDto(existingUser);
     }
 
     @Test

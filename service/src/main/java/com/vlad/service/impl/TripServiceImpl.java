@@ -6,9 +6,7 @@ import com.vlad.dto.trip.TripCreateDto;
 import com.vlad.dto.trip.TripEditDto;
 import com.vlad.dto.trip.TripReadDto;
 import com.vlad.entity.QTrip;
-import com.vlad.mapper.TripCreateMapper;
-import com.vlad.mapper.TripEditMapper;
-import com.vlad.mapper.TripReadMapper;
+import com.vlad.mapper.TripMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.TripRepository;
 import com.vlad.service.TripService;
@@ -26,9 +24,7 @@ import java.util.Optional;
 public class TripServiceImpl implements TripService {
 
     private final TripRepository tripRepository;
-    private final TripReadMapper tripReadMapper;
-    private final TripCreateMapper tripCreateMapper;
-    private final TripEditMapper tripEditMapper;
+    private final TripMapper tripMapper;
 
     @Override
     public Page<TripReadDto> findAll(TripFilterDto tripFilterDto, Pageable pageable) {
@@ -36,22 +32,22 @@ public class TripServiceImpl implements TripService {
                 .add(tripFilterDto.getStatus(), QTrip.trip.status::eq)
                 .buildAnd();
         return tripRepository.findAll(predicate, pageable)
-                .map(tripReadMapper::map);
+                .map(tripMapper::toDto);
     }
 
     @Override
     public Optional<TripReadDto> findById(Long id) {
         return tripRepository.findById(id)
-                .map(tripReadMapper::map);
+                .map(tripMapper::toDto);
     }
 
     @Override
     @Transactional
     public TripReadDto save(TripCreateDto tripCreateDto) {
         return Optional.of(tripCreateDto)
-                .map(tripCreateMapper::map)
+                .map(tripMapper::toEntity)
                 .map(tripRepository::save)
-                .map(tripReadMapper::map)
+                .map(tripMapper::toDto)
                 .orElseThrow();
     }
 
@@ -59,9 +55,11 @@ public class TripServiceImpl implements TripService {
     @Transactional
     public Optional<TripReadDto> update(Long id, TripEditDto tripEditDto) {
         return tripRepository.findById(id)
-                .map(entity -> tripEditMapper.map(tripEditDto, entity))
-                .map(tripRepository::saveAndFlush)
-                .map(tripReadMapper::map);
+                .map(existingTrip -> {
+                    tripMapper.updateEntityFromDto(tripEditDto, existingTrip);
+                    return tripRepository.saveAndFlush(existingTrip);
+                })
+                .map(tripMapper::toDto);
     }
 
     @Override

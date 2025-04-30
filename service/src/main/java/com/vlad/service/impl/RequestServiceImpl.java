@@ -5,8 +5,7 @@ import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.dto.request.RequestCreateEditDto;
 import com.vlad.dto.request.RequestReadDto;
 import com.vlad.entity.QRequest;
-import com.vlad.mapper.RequestCreateEditMapper;
-import com.vlad.mapper.RequestReadMapper;
+import com.vlad.mapper.RequestMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.RequestRepository;
 import com.vlad.service.RequestService;
@@ -24,8 +23,7 @@ import java.util.Optional;
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
-    private final RequestReadMapper requestReadMapper;
-    private final RequestCreateEditMapper requestCreateEditMapper;
+    private final RequestMapper requestMapper;
 
     @Override
     public Page<RequestReadDto> findAll(RequestFilterDto requestFilterDto, Pageable pageable) {
@@ -36,22 +34,22 @@ public class RequestServiceImpl implements RequestService {
                 .add(requestFilterDto.getCreationDate(), QRequest.request.creationDate::eq)
                 .buildAnd();
         return requestRepository.findAll(predicate, pageable)
-                .map(requestReadMapper::map);
+                .map(requestMapper::toDto);
     }
 
     @Override
     public Optional<RequestReadDto> findById(Long id) {
         return requestRepository.findById(id)
-                .map(requestReadMapper::map);
+                .map(requestMapper::toDto);
     }
 
     @Override
     @Transactional
     public RequestReadDto save(RequestCreateEditDto requestCreateEditDto) {
         return Optional.of(requestCreateEditDto)
-                .map(requestCreateEditMapper::map)
+                .map(requestMapper::toEntity)
                 .map(requestRepository::save)
-                .map(requestReadMapper::map)
+                .map(requestMapper::toDto)
                 .orElseThrow();
     }
 
@@ -59,9 +57,11 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public Optional<RequestReadDto> update(Long id, RequestCreateEditDto requestCreateEditDto) {
         return requestRepository.findByIdWithLock(id)
-                .map(entity -> requestCreateEditMapper.map(requestCreateEditDto, entity))
-                .map(requestRepository::saveAndFlush)
-                .map(requestReadMapper::map);
+                .map(existingRequest -> {
+                    requestMapper.updateEntityFromDto(requestCreateEditDto, existingRequest);
+                    return requestRepository.saveAndFlush(existingRequest);
+                })
+                .map(requestMapper::toDto);
     }
 
     @Override

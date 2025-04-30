@@ -3,9 +3,7 @@ package com.vlad.service.impl;
 import com.vlad.dto.driver.DriverCreateDto;
 import com.vlad.dto.driver.DriverEditDto;
 import com.vlad.dto.driver.DriverReadDto;
-import com.vlad.mapper.DriverCreateMapper;
-import com.vlad.mapper.DriverEditMapper;
-import com.vlad.mapper.DriverReadMapper;
+import com.vlad.mapper.DriverMapper;
 import com.vlad.repository.DriverRepository;
 import com.vlad.service.DriverService;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +19,28 @@ import java.util.Optional;
 public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
-    private final DriverReadMapper driverReadMapper;
-    private final DriverCreateMapper driverCreateMapper;
-    private final DriverEditMapper driverEditMapper;
+    private final DriverMapper driverMapper;
 
     @Override
     public List<DriverReadDto> findAll() {
         return driverRepository.findAll().stream()
-                .map(driverReadMapper::map)
+                .map(driverMapper::toDto)
                 .toList();
     }
 
     @Override
     public Optional<DriverReadDto> findById(Long id) {
         return driverRepository.findById(id)
-                .map(driverReadMapper::map);
+                .map(driverMapper::toDto);
     }
 
     @Override
     @Transactional
     public DriverReadDto save(DriverCreateDto driverCreateDto) {
         return Optional.of(driverCreateDto)
-                .map(driverCreateMapper::map)
+                .map(driverMapper::toEntity)
                 .map(driverRepository::save)
-                .map(driverReadMapper::map)
+                .map(driverMapper::toDto)
                 .orElseThrow();
     }
 
@@ -52,9 +48,11 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public Optional<DriverReadDto> update(Long id, DriverEditDto driverEditDto) {
         return driverRepository.findById(id)
-                .map(entity -> driverEditMapper.map(driverEditDto, entity))
-                .map(driverRepository::saveAndFlush)
-                .map(driverReadMapper::map);
+                .map(existingDriver -> {
+                    driverMapper.updateEntityFromDto(driverEditDto, existingDriver);
+                    return driverRepository.saveAndFlush(existingDriver);
+                })
+                .map(driverMapper::toDto);
     }
 
     @Override

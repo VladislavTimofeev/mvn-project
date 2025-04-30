@@ -8,10 +8,8 @@ import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.Driver;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.mapper.DriverCreateMapper;
-import com.vlad.mapper.DriverEditMapper;
-import com.vlad.mapper.DriverReadMapper;
-import com.vlad.mapper.UserCreateEditMapper;
+import com.vlad.mapper.DriverMapper;
+import com.vlad.mapper.UserMapper;
 import com.vlad.repository.DriverRepository;
 import com.vlad.service.impl.DriverServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -39,13 +38,9 @@ class DriverServiceImplTest {
     @Mock
     private DriverRepository driverRepository;
     @Mock
-    private DriverReadMapper driverReadMapper;
+    private DriverMapper driverMapper;
     @Mock
-    private DriverCreateMapper driverCreateMapper;
-    @Mock
-    private DriverEditMapper driverEditMapper;
-    @Mock
-    private UserCreateEditMapper userMapper;
+    private UserMapper userMapper;
     @InjectMocks
     private DriverServiceImpl driverServiceImpl;
 
@@ -59,17 +54,17 @@ class DriverServiceImplTest {
         DriverReadDto driverReadDto2 = getDriverReadDto(2L, "Bob");
         DriverReadDto driverReadDto3 = getDriverReadDto(3L, "Charlie");
         doReturn(drivers).when(driverRepository).findAll();
-        doReturn(driverReadDto1).when(driverReadMapper).map(driver1);
-        doReturn(driverReadDto2).when(driverReadMapper).map(driver2);
-        doReturn(driverReadDto3).when(driverReadMapper).map(driver3);
+        doReturn(driverReadDto1).when(driverMapper).toDto(driver1);
+        doReturn(driverReadDto2).when(driverMapper).toDto(driver2);
+        doReturn(driverReadDto3).when(driverMapper).toDto(driver3);
 
         List<DriverReadDto> actualResult = driverServiceImpl.findAll();
 
         assertThat(actualResult).hasSize(3);
         verify(driverRepository, times(1)).findAll();
-        verify(driverReadMapper, times(1)).map(driver1);
-        verify(driverReadMapper, times(1)).map(driver2);
-        verify(driverReadMapper, times(1)).map(driver3);
+        verify(driverMapper, times(1)).toDto(driver1);
+        verify(driverMapper, times(1)).toDto(driver2);
+        verify(driverMapper, times(1)).toDto(driver3);
     }
 
     @Test
@@ -77,14 +72,14 @@ class DriverServiceImplTest {
         Driver driver = getDriver(1L, "Alexander");
         DriverReadDto driverReadDto = getDriverReadDto(1L, "Alexander");
         doReturn(Optional.of(driver)).when(driverRepository).findById(driver.getId());
-        doReturn(driverReadDto).when(driverReadMapper).map(driver);
+        doReturn(driverReadDto).when(driverMapper).toDto(driver);
 
         Optional<DriverReadDto> actualResult = driverServiceImpl.findById(driver.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult.get()).isEqualTo(driverReadDto);
         verify(driverRepository, times(1)).findById(driver.getId());
-        verify(driverReadMapper, times(1)).map(driver);
+        verify(driverMapper, times(1)).toDto(driver);
     }
 
     @Test
@@ -96,7 +91,7 @@ class DriverServiceImplTest {
 
         assertThat(actualResult).isNotPresent();
         verify(driverRepository, times(1)).findById(driver.getId());
-        verifyNoInteractions(driverReadMapper);
+        verifyNoInteractions(driverMapper);
     }
 
     @Test
@@ -104,41 +99,40 @@ class DriverServiceImplTest {
         DriverCreateDto driverCreateDto = new DriverCreateDto(1L, "Pavel", "AGKN453FS", "2887359");
         Driver driver = getDriver(1L, "Pavel");
         DriverReadDto driverReadDto = getDriverReadDto(1L, "Pavel");
-        when(driverCreateMapper.map(driverCreateDto)).thenReturn(driver);
+        when(driverMapper.toEntity(driverCreateDto)).thenReturn(driver);
         when(driverRepository.save(driver)).thenReturn(driver);
-        when(driverReadMapper.map(driver)).thenReturn(driverReadDto);
+        when(driverMapper.toDto(driver)).thenReturn(driverReadDto);
 
         DriverReadDto actualResult = driverServiceImpl.save(driverCreateDto);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isEqualTo(driverReadDto.getId());
         assertThat(actualResult.getName()).isEqualTo(driverReadDto.getName());
-        verify(driverCreateMapper, times(1)).map(driverCreateDto);
+        verify(driverMapper, times(1)).toEntity(driverCreateDto);
         verify(driverRepository, times(1)).save(driver);
-        verify(driverReadMapper, times(1)).map(driver);
+        verify(driverMapper, times(1)).toDto(driver);
     }
 
     @Test
     void shouldUpdateExistingDriver() {
         DriverEditDto driverEditDto = new DriverEditDto(1L, "Polina", "AAAAAAAAA", "0000000");
         UserCreateEditDto carrierDto = new UserCreateEditDto("vladtrans", "234546", "fastWayDelivery", "3450098", "Krupskaia 21/3", Role.CARRIER);
-        User carrier = userMapper.map(carrierDto);
+        User carrier = userMapper.toEntity(carrierDto);
         Driver existingDriver = new Driver(1L, carrier, "Maria", "AFG5474FH", "2456733");
-        Driver updatedDriver = new Driver(1L,carrier,"Polina","AAAAAAAAA","0000000");
         DriverReadDto expectedDriverReadDto = getDriverReadDto(1L, "Polina");
         when(driverRepository.findById(existingDriver.getId())).thenReturn(Optional.of(existingDriver));
-        when(driverEditMapper.map(driverEditDto,existingDriver)).thenReturn(updatedDriver);
-        when(driverRepository.saveAndFlush(updatedDriver)).thenReturn(updatedDriver);
-        when(driverReadMapper.map(updatedDriver)).thenReturn(expectedDriverReadDto);
+        doNothing().when(driverMapper).updateEntityFromDto(driverEditDto,existingDriver);
+        when(driverRepository.saveAndFlush(existingDriver)).thenReturn(existingDriver);
+        when(driverMapper.toDto(existingDriver)).thenReturn(expectedDriverReadDto);
 
         Optional<DriverReadDto> actualResult = driverServiceImpl.update(1L, driverEditDto);
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedDriverReadDto);
         verify(driverRepository, times(1)).findById(existingDriver.getId());
-        verify(driverEditMapper, times(1)).map(driverEditDto, existingDriver);
-        verify(driverRepository, times(1)).saveAndFlush(updatedDriver);
-        verify(driverReadMapper, times(1)).map(updatedDriver);
+        verify(driverMapper, times(1)).updateEntityFromDto(driverEditDto, existingDriver);
+        verify(driverRepository, times(1)).saveAndFlush(existingDriver);
+        verify(driverMapper, times(1)).toDto(existingDriver);
     }
 
     @Test
@@ -150,12 +144,12 @@ class DriverServiceImplTest {
 
         assertThat(actualResult).isTrue();
         verify(driverRepository, times(1)).findById(driver.getId());
-        verify(driverRepository,times(1)).delete(driver);
+        verify(driverRepository, times(1)).delete(driver);
         verify(driverRepository, times(1)).flush();
     }
 
     @Test
-    void deleteShouldReturnFalseWhenDriverNotFound(){
+    void deleteShouldReturnFalseWhenDriverNotFound() {
         Driver driver = getDriver(1L, "Alexander");
         when(driverRepository.findById(driver.getId())).thenReturn(Optional.empty());
 
@@ -173,7 +167,7 @@ class DriverServiceImplTest {
 
     private Driver getDriver(Long id, String name) {
         UserCreateEditDto carrierDto = getCarrier();
-        User carrier = userMapper.map(carrierDto);
+        User carrier = userMapper.toEntity(carrierDto);
         return Driver.builder()
                 .id(id)
                 .carrier(carrier)

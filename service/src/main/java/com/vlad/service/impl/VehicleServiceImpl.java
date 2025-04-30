@@ -6,9 +6,7 @@ import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
 import com.vlad.entity.QVehicle;
-import com.vlad.mapper.VehicleCreateMapper;
-import com.vlad.mapper.VehicleEditMapper;
-import com.vlad.mapper.VehicleReadMapper;
+import com.vlad.mapper.VehicleMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.VehicleRepository;
 import com.vlad.service.VehicleService;
@@ -26,9 +24,7 @@ import java.util.Optional;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
-    private final VehicleReadMapper vehicleReadMapper;
-    private final VehicleCreateMapper vehicleCreateMapper;
-    private final VehicleEditMapper vehicleEditMapper;
+    private final VehicleMapper vehicleMapper;
 
     @Override
     public Page<VehicleReadDto> findAll(VehicleFilterDto vehicleFilterDto, Pageable pageable) {
@@ -40,22 +36,22 @@ public class VehicleServiceImpl implements VehicleService {
                 .add(vehicleFilterDto.getModel(), QVehicle.vehicle.model::eq)
                 .buildAnd();
         return vehicleRepository.findAll(predicate, pageable)
-                .map(vehicleReadMapper::map);
+                .map(vehicleMapper::toDto);
     }
 
     @Override
     public Optional<VehicleReadDto> findById(Long id) {
         return vehicleRepository.findById(id)
-                .map(vehicleReadMapper::map);
+                .map(vehicleMapper::toDto);
     }
 
     @Override
     @Transactional
     public VehicleReadDto save(VehicleCreateDto vehicleCreateDto) {
         return Optional.of(vehicleCreateDto)
-                .map(vehicleCreateMapper::map)
+                .map(vehicleMapper::toEntity)
                 .map(vehicleRepository::save)
-                .map(vehicleReadMapper::map)
+                .map(vehicleMapper::toDto)
                 .orElseThrow();
     }
 
@@ -63,9 +59,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Transactional
     public Optional<VehicleReadDto> update(Long id, VehicleEditDto vehicleEditDto) {
         return vehicleRepository.findById(id)
-                .map(entity -> vehicleEditMapper.map(vehicleEditDto, entity))
-                .map(vehicleRepository::saveAndFlush)
-                .map(vehicleReadMapper::map);
+                .map(existingVehicle -> {
+                    vehicleMapper.updateEntityFromDto(vehicleEditDto, existingVehicle);
+                    return vehicleRepository.saveAndFlush(existingVehicle);
+                })
+                .map(vehicleMapper::toDto);
     }
 
     @Override
