@@ -6,29 +6,24 @@ import com.vlad.dto.vehicle.VehicleReadDto;
 import com.vlad.entity.User;
 import com.vlad.entity.Vehicle;
 import com.vlad.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
-@RequiredArgsConstructor
-public abstract class VehicleMapper {
+public interface VehicleMapper {
 
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-
-    public abstract VehicleReadDto toDto(Vehicle vehicle);
+    VehicleReadDto toDto(Vehicle vehicle);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    public abstract Vehicle toEntity(VehicleCreateDto dto);
+    Vehicle toEntity(VehicleCreateDto dto);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    public abstract void updateEntityFromDto(VehicleEditDto dto, @MappingTarget Vehicle vehicle);
+    void updateEntityFromDto(VehicleEditDto dto, @MappingTarget Vehicle vehicle, UserRepository userRepository);
 
     @Named("mapCarrierIdToUser")
-    protected User mapCarrierIdToUser(Long id) {
+    default User mapCarrierIdToUser(Long id, UserRepository userRepository) {
         return id == null ? null : userRepository.findById(id).orElse(null);
     }
 }

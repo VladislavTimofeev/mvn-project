@@ -5,6 +5,7 @@ import com.vlad.dto.driver.DriverEditDto;
 import com.vlad.dto.driver.DriverReadDto;
 import com.vlad.mapper.DriverMapper;
 import com.vlad.repository.DriverRepository;
+import com.vlad.repository.UserRepository;
 import com.vlad.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
+    private final UserRepository userRepository;
     private final DriverMapper driverMapper;
 
     @Override
@@ -49,7 +51,7 @@ public class DriverServiceImpl implements DriverService {
     public Optional<DriverReadDto> update(Long id, DriverEditDto driverEditDto) {
         return driverRepository.findById(id)
                 .map(existingDriver -> {
-                    driverMapper.updateEntityFromDto(driverEditDto, existingDriver);
+                    driverMapper.updateEntityFromDto(driverEditDto, existingDriver, userRepository);
                     return driverRepository.saveAndFlush(existingDriver);
                 })
                 .map(driverMapper::toDto);

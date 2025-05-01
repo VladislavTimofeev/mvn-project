@@ -14,6 +14,7 @@ import com.vlad.entity.Vehicle;
 import com.vlad.mapper.UserMapper;
 import com.vlad.mapper.VehicleMapper;
 import com.vlad.repository.QPredicate;
+import com.vlad.repository.UserRepository;
 import com.vlad.repository.VehicleRepository;
 import com.vlad.service.impl.VehicleServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,8 @@ class VehicleServiceImplTest {
     private VehicleMapper vehicleMapper;
     @Mock
     private VehicleRepository vehicleRepository;
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private VehicleServiceImpl vehicleServiceImpl;
 
@@ -145,7 +148,7 @@ class VehicleServiceImplTest {
         Vehicle existingVehicle = getVehicle(1L, "AAA123CX", 25, "ISUZU");
         VehicleReadDto expectedVehicleReadDto = getVehicleReadDto(1L, "BBB666GG", BigDecimal.valueOf(1500), 20, true, "MAZDA");
         when(vehicleRepository.findById(existingVehicle.getId())).thenReturn(Optional.of(existingVehicle));
-        doNothing().when(vehicleMapper).updateEntityFromDto(vehicleEditDto, existingVehicle);
+        doNothing().when(vehicleMapper).updateEntityFromDto(vehicleEditDto, existingVehicle, userRepository);
         when(vehicleRepository.saveAndFlush(existingVehicle)).thenReturn(existingVehicle);
         when(vehicleMapper.toDto(existingVehicle)).thenReturn(expectedVehicleReadDto);
 
@@ -154,7 +157,7 @@ class VehicleServiceImplTest {
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedVehicleReadDto);
         verify(vehicleRepository, times(1)).findById(existingVehicle.getId());
-        verify(vehicleMapper, times(1)).updateEntityFromDto(vehicleEditDto, existingVehicle);
+        verify(vehicleMapper, times(1)).updateEntityFromDto(vehicleEditDto, existingVehicle, userRepository);
         verify(vehicleRepository, times(1)).saveAndFlush(existingVehicle);
         verify(vehicleMapper, times(1)).toDto(existingVehicle);
     }

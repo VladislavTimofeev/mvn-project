@@ -6,29 +6,24 @@ import com.vlad.dto.driver.DriverReadDto;
 import com.vlad.entity.Driver;
 import com.vlad.entity.User;
 import com.vlad.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
-@RequiredArgsConstructor
-public abstract class DriverMapper {
+public interface DriverMapper {
 
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-
-    public abstract DriverReadDto toDto(Driver driver);
+    DriverReadDto toDto(Driver driver);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    public abstract Driver toEntity(DriverCreateDto dto);
+    Driver toEntity(DriverCreateDto dto);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    public abstract void updateEntityFromDto(DriverEditDto dto, @MappingTarget Driver driver);
+    void updateEntityFromDto(DriverEditDto dto, @MappingTarget Driver driver, UserRepository userRepository);
 
     @Named("mapCarrierIdToUser")
-    protected User mapCarrierIdToUser(Long id) {
+    default User mapCarrierIdToUser(Long id, UserRepository userRepository) {
         return id == null ? null : userRepository.findById(id).orElse(null);
     }
 }

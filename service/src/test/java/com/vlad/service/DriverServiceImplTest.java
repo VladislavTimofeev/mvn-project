@@ -11,6 +11,7 @@ import com.vlad.entity.User;
 import com.vlad.mapper.DriverMapper;
 import com.vlad.mapper.UserMapper;
 import com.vlad.repository.DriverRepository;
+import com.vlad.repository.UserRepository;
 import com.vlad.service.impl.DriverServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,8 @@ class DriverServiceImplTest {
 
     @Mock
     private DriverRepository driverRepository;
+    @Mock
+    private UserRepository userRepository;
     @Mock
     private DriverMapper driverMapper;
     @Mock
@@ -121,7 +124,7 @@ class DriverServiceImplTest {
         Driver existingDriver = new Driver(1L, carrier, "Maria", "AFG5474FH", "2456733");
         DriverReadDto expectedDriverReadDto = getDriverReadDto(1L, "Polina");
         when(driverRepository.findById(existingDriver.getId())).thenReturn(Optional.of(existingDriver));
-        doNothing().when(driverMapper).updateEntityFromDto(driverEditDto,existingDriver);
+        doNothing().when(driverMapper).updateEntityFromDto(driverEditDto, existingDriver, userRepository);
         when(driverRepository.saveAndFlush(existingDriver)).thenReturn(existingDriver);
         when(driverMapper.toDto(existingDriver)).thenReturn(expectedDriverReadDto);
 
@@ -130,7 +133,7 @@ class DriverServiceImplTest {
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedDriverReadDto);
         verify(driverRepository, times(1)).findById(existingDriver.getId());
-        verify(driverMapper, times(1)).updateEntityFromDto(driverEditDto, existingDriver);
+        verify(driverMapper, times(1)).updateEntityFromDto(driverEditDto, existingDriver, userRepository);
         verify(driverRepository, times(1)).saveAndFlush(existingDriver);
         verify(driverMapper, times(1)).toDto(existingDriver);
     }

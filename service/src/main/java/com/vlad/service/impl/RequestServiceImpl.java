@@ -8,6 +8,7 @@ import com.vlad.entity.QRequest;
 import com.vlad.mapper.RequestMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.RequestRepository;
+import com.vlad.repository.UserRepository;
 import com.vlad.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
     private final RequestMapper requestMapper;
 
     @Override
@@ -58,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
     public Optional<RequestReadDto> update(Long id, RequestCreateEditDto requestCreateEditDto) {
         return requestRepository.findByIdWithLock(id)
                 .map(existingRequest -> {
-                    requestMapper.updateEntityFromDto(requestCreateEditDto, existingRequest);
+                    requestMapper.updateEntityFromDto(requestCreateEditDto, existingRequest, userRepository);
                     return requestRepository.saveAndFlush(existingRequest);
                 })
                 .map(requestMapper::toDto);

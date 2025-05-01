@@ -8,6 +8,7 @@ import com.vlad.dto.vehicle.VehicleReadDto;
 import com.vlad.entity.QVehicle;
 import com.vlad.mapper.VehicleMapper;
 import com.vlad.repository.QPredicate;
+import com.vlad.repository.UserRepository;
 import com.vlad.repository.VehicleRepository;
 import com.vlad.service.VehicleService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
     private final VehicleMapper vehicleMapper;
 
     @Override
@@ -60,7 +62,7 @@ public class VehicleServiceImpl implements VehicleService {
     public Optional<VehicleReadDto> update(Long id, VehicleEditDto vehicleEditDto) {
         return vehicleRepository.findById(id)
                 .map(existingVehicle -> {
-                    vehicleMapper.updateEntityFromDto(vehicleEditDto, existingVehicle);
+                    vehicleMapper.updateEntityFromDto(vehicleEditDto, existingVehicle, userRepository);
                     return vehicleRepository.saveAndFlush(existingVehicle);
                 })
                 .map(vehicleMapper::toDto);

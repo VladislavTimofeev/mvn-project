@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,6 +37,8 @@ class UserServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
@@ -93,20 +97,24 @@ class UserServiceImplTest {
                 .address("Pushkina 31-2")
                 .role(Role.ADMIN)
                 .build();
+        User userWithEncodedPassword = User.builder()
+                .password("encoded-password")
+                .role(Role.ADMIN)
+                .build();
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
         when(userMapper.toEntity(userCreateEditDto)).thenReturn(user);
-        when(userRepository.save(user)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(userReadDto);
+        when(passwordEncoder.encode("123gg")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenReturn(userWithEncodedPassword);
+        when(userMapper.toDto(userWithEncodedPassword)).thenReturn(userReadDto);
 
         UserReadDto actualResult = userServiceImpl.save(userCreateEditDto);
 
         assertThat(actualResult).isNotNull();
-        assertThat(actualResult.getId()).isEqualTo(user.getId());
-        assertThat(actualResult.getUsername()).isEqualTo(user.getUsername());
-        assertThat(actualResult.getRole()).isEqualTo(user.getRole());
-        verify(userMapper, times(1)).toEntity(userCreateEditDto);
-        verify(userRepository, times(1)).save(user);
-        verify(userMapper, times(1)).toDto(user);
+        assertThat(actualResult.getUsername()).isEqualTo("vlad@gmail.com");
+        assertThat(actualResult.getRole()).isEqualTo(Role.ADMIN);
+        verify(passwordEncoder, times(1)).encode("123gg");
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(userMapper).toDto(userWithEncodedPassword);
     }
 
     @Test
@@ -122,17 +130,18 @@ class UserServiceImplTest {
                 .role(Role.ADMIN)
                 .build();
         UserReadDto expectedUserReadDto = new UserReadDto(1L, "masha@gmail.com", "Maria", "77889900", "Pushkina 66-1", Role.CUSTOMER);
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode("123gg")).thenReturn("encoded-new-password");
         when(userRepository.saveAndFlush(existingUser)).thenReturn(existingUser);
         when(userMapper.toDto(existingUser)).thenReturn(expectedUserReadDto);
 
         Optional<UserReadDto> actualResult = userServiceImpl.update(1L, userCreateEditDto);
 
-        assertThat(actualResult).isPresent();
-        assertThat(actualResult).contains(expectedUserReadDto);
-        verify(userRepository, times(1)).findById(existingUser.getId());
-        verify(userRepository, times(1)).saveAndFlush(existingUser);
+        assertThat(actualResult).isPresent().contains(expectedUserReadDto);
+        verify(userRepository, times(1)).findById(1L);
         verify(userMapper, times(1)).updateEntityFromDto(userCreateEditDto, existingUser);
+        verify(passwordEncoder).encode("123gg");
+        verify(userRepository, times(1)).saveAndFlush(existingUser);
         verify(userMapper).toDto(existingUser);
     }
 
