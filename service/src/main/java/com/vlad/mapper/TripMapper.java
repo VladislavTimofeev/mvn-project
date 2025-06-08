@@ -16,32 +16,42 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring", uses = {RequestMapper.class, VehicleMapper.class, DriverMapper.class})
-public interface TripMapper {
+public abstract class TripMapper {
 
-    TripReadDto toDto(Trip trip);
+    private final RequestRepository requestRepository;
+    private final VehicleRepository vehicleRepository;
+    private final DriverRepository driverRepository;
+
+    protected TripMapper(RequestRepository requestRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository) {
+        this.requestRepository = requestRepository;
+        this.vehicleRepository = vehicleRepository;
+        this.driverRepository = driverRepository;
+    }
+
+    public abstract TripReadDto toDto(Trip trip);
 
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToRequest")
     @Mapping(target = "vehicle", source = "vehicleId", qualifiedByName = "mapVehicleIdToVehicle")
     @Mapping(target = "driver", source = "driverId", qualifiedByName = "mapDriverIdToDriver")
-    Trip toEntity(TripCreateDto dto, RequestRepository requestRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository);
+    public abstract Trip toEntity(TripCreateDto dto);
 
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToRequest")
     @Mapping(target = "vehicle", source = "vehicleId", qualifiedByName = "mapVehicleIdToVehicle")
     @Mapping(target = "driver", source = "driverId", qualifiedByName = "mapDriverIdToDriver")
-    void updateEntityFromDto(TripEditDto dto, @MappingTarget Trip trip, RequestRepository requestRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository);
+    public abstract void updateEntityFromDto(TripEditDto dto, @MappingTarget Trip trip);
 
     @Named("mapRequestIdToRequest")
-    default Request mapRequestIdToRequest(Long id, RequestRepository requestRepository) {
+    protected Request mapRequestIdToRequest(Long id) {
         return id == null ? null : requestRepository.findById(id).orElse(null);
     }
 
     @Named("mapVehicleIdToVehicle")
-    default Vehicle mapVehicleIdToVehicle(Long id, VehicleRepository vehicleRepository) {
+    protected Vehicle mapVehicleIdToVehicle(Long id) {
         return id == null ? null : vehicleRepository.findById(id).orElse(null);
     }
 
     @Named("mapDriverIdToDriver")
-    default Driver mapDriverIdToDriver(Long id, DriverRepository driverRepository) {
+    protected Driver mapDriverIdToDriver(Long id) {
         return id == null ? null : driverRepository.findById(id).orElse(null);
     }
 }

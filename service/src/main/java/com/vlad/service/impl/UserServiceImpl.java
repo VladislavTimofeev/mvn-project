@@ -5,7 +5,6 @@ import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.QUser;
-import com.vlad.entity.Role;
 import com.vlad.mapper.UserMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.UserRepository;
@@ -17,7 +16,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +30,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<UserReadDto> findAll(UserFilterDto userFilterDto, Pageable pageable) {
@@ -62,16 +59,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Transactional
     public UserReadDto save(UserCreateEditDto userCreateEditDto) {
         return Optional.of(userCreateEditDto)
-                .map(userMapper::toEntity)
-                .map(user -> {
-                    user.setPassword(Optional.ofNullable(userCreateEditDto.getPassword())
-                            .filter(pwd -> !pwd.isBlank())
-                            .map(passwordEncoder::encode)
-                            .orElse(null));
-                    user.setRole(Optional.ofNullable(userCreateEditDto.getRole())
-                            .orElse(Role.GUEST));
-                    return user;
-                })
+                .map(user -> userMapper.toEntity(userCreateEditDto))
                 .map(userRepository::save)
                 .map(userMapper::toDto)
                 .orElseThrow();
@@ -83,13 +71,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findById(id)
                 .map(existingUser -> {
                     userMapper.updateEntityFromDto(userCreateEditDto, existingUser);
-
-                    Optional.ofNullable(userCreateEditDto.getPassword())
-                            .filter(pwd -> !pwd.isBlank())
-                            .map(passwordEncoder::encode)
-                            .ifPresent(existingUser::setPassword);
-                    Optional.ofNullable(userCreateEditDto.getRole())
-                            .ifPresent(existingUser::setRole);
                     return userRepository.saveAndFlush(existingUser);
                 })
                 .map(userMapper::toDto);

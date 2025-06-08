@@ -3,23 +3,27 @@ package com.vlad.dto.user;
 import com.vlad.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldNameConstants
 public class UserCreateEditDto {
 
     @Email
-    String username;
+    private String username;
 
     @NotBlank
-    String password;
+    private String password;
 
     @NotBlank
-    String name;
+    private String name;
 
-    String contactInfo;
-    String address;
-    Role role;
+    private String contactInfo;
+    private String address;
+    private Role role;
 }

@@ -1,17 +1,21 @@
 package com.vlad.dto.vehicle;
 
 import com.vlad.dto.user.UserReadDto;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class VehicleReadDto {
-    Long id;
-    UserReadDto carrier;
-    String licensePlate;
-    BigDecimal capacity;
-    Integer palletCapacity;
-    Boolean refrigerated;
-    String model;
+    private Long id;
+    private UserReadDto carrier;
+    private String licensePlate;
+    private BigDecimal capacity;
+    private Integer palletCapacity;
+    private Boolean refrigerated;
+    private String model;
 }

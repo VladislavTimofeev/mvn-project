@@ -7,11 +7,8 @@ import com.vlad.dto.trip.TripEditDto;
 import com.vlad.dto.trip.TripReadDto;
 import com.vlad.entity.QTrip;
 import com.vlad.mapper.TripMapper;
-import com.vlad.repository.DriverRepository;
 import com.vlad.repository.QPredicate;
-import com.vlad.repository.RequestRepository;
 import com.vlad.repository.TripRepository;
-import com.vlad.repository.VehicleRepository;
 import com.vlad.service.TripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,9 +24,6 @@ import java.util.Optional;
 public class TripServiceImpl implements TripService {
 
     private final TripRepository tripRepository;
-    private final RequestRepository requestRepository;
-    private final VehicleRepository vehicleRepository;
-    private final DriverRepository driverRepository;
     private final TripMapper tripMapper;
 
     @Override
@@ -51,7 +45,7 @@ public class TripServiceImpl implements TripService {
     @Transactional
     public TripReadDto save(TripCreateDto tripCreateDto) {
         return Optional.of(tripCreateDto)
-                .map(dto -> tripMapper.toEntity(dto, requestRepository, vehicleRepository, driverRepository))
+                .map(tripMapper::toEntity)
                 .map(tripRepository::save)
                 .map(tripMapper::toDto)
                 .orElseThrow();
@@ -62,7 +56,7 @@ public class TripServiceImpl implements TripService {
     public Optional<TripReadDto> update(Long id, TripEditDto tripEditDto) {
         return tripRepository.findById(id)
                 .map(existingTrip -> {
-                    tripMapper.updateEntityFromDto(tripEditDto, existingTrip, requestRepository, vehicleRepository, driverRepository);
+                    tripMapper.updateEntityFromDto(tripEditDto, existingTrip);
                     return tripRepository.saveAndFlush(existingTrip);
                 })
                 .map(tripMapper::toDto);

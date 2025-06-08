@@ -2,23 +2,27 @@ package com.vlad.dto.request;
 
 import com.vlad.entity.RequestStatus;
 import jakarta.validation.constraints.NotNull;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RequestCreateEditDto {
     @NotNull
-    Long customerId;
-    RequestStatus status;
-    String cargoDetails;
-    BigDecimal weight;
-    Integer palletCount;
-    Boolean refrigerated;
-    String pickupAddress;
-    String deliveryAddress;
-    LocalDate creationDate;
+    private Long customerId;
+    private RequestStatus status;
+    private String cargoDetails;
+    private BigDecimal weight;
+    private Integer palletCount;
+    private Boolean refrigerated;
+    private String pickupAddress;
+    private String deliveryAddress;
+    private LocalDate creationDate;
     @NotNull
-    Long carrierId;
+    private Long carrierId;
 }

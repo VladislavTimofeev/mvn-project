@@ -1,14 +1,18 @@
 package com.vlad.dto.user;
 
 import com.vlad.entity.Role;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserReadDto {
-    Long id;
-    String username;
-    String name;
-    String contactInfo;
-    String address;
-    Role role;
+    private Long id;
+    private String username;
+    private String name;
+    private String contactInfo;
+    private String address;
+    private Role role;
 }

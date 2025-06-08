@@ -1,11 +1,15 @@
 package com.vlad.dto.driver;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DriverEditDto {
-    Long carrierId;
-    String name;
-    String licenseNumber;
-    String phoneNumber;
+    private Long carrierId;
+    private String name;
+    private String licenseNumber;
+    private String phoneNumber;
 }

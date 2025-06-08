@@ -10,26 +10,32 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
-public interface RequestMapper {
+@Mapper(componentModel = "spring")
+public abstract class RequestMapper {
 
-    RequestReadDto toDto(Request request);
+    private final UserRepository userRepository;
+
+    protected RequestMapper(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public abstract RequestReadDto toDto(Request request);
 
     @Mapping(target = "customer", source = "customerId", qualifiedByName = "mapCustomerIdToUser")
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    Request toEntity(RequestCreateEditDto dto);
+    public abstract Request toEntity(RequestCreateEditDto dto);
 
     @Mapping(target = "customer", source = "customerId", qualifiedByName = "mapCustomerIdToUser")
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    void updateEntityFromDto(RequestCreateEditDto dto, @MappingTarget Request request, UserRepository userRepository);
+    public abstract void updateEntityFromDto(RequestCreateEditDto dto, @MappingTarget Request request);
 
     @Named("mapCustomerIdToUser")
-    default User mapCustomerIdToUser(Long id, UserRepository userRepository) {
+    protected User mapCustomerIdToUser(Long id) {
         return id == null ? null : userRepository.findById(id).orElse(null);
     }
 
     @Named("mapCarrierIdToUser")
-    default User mapCarrierIdToUser(Long id, UserRepository userRepository) {
+    protected User mapCarrierIdToUser(Long id) {
         return id == null ? null : userRepository.findById(id).orElse(null);
     }
 }

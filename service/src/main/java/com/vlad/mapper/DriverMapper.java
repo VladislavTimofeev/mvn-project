@@ -12,18 +12,26 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
-public interface DriverMapper {
+public abstract class DriverMapper {
 
-    DriverReadDto toDto(Driver driver);
+    protected UserRepository userRepository;
+    protected UserMapper userMapper;
+
+    protected DriverMapper(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
+
+    public abstract DriverReadDto toDto(Driver driver);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    Driver toEntity(DriverCreateDto dto);
+    public abstract Driver toEntity(DriverCreateDto dto);
 
     @Mapping(target = "carrier", source = "carrierId", qualifiedByName = "mapCarrierIdToUser")
-    void updateEntityFromDto(DriverEditDto dto, @MappingTarget Driver driver, UserRepository userRepository);
+    public abstract void updateEntityFromDto(DriverEditDto dto, @MappingTarget Driver driver);
 
     @Named("mapCarrierIdToUser")
-    default User mapCarrierIdToUser(Long id, UserRepository userRepository) {
+    protected User mapCarrierIdToUser(Long id) {
         return id == null ? null : userRepository.findById(id).orElse(null);
     }
 }
