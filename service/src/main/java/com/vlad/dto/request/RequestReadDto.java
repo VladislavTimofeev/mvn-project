@@ -2,22 +2,27 @@ package com.vlad.dto.request;
 
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.RequestStatus;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RequestReadDto {
-    Long id;
-    UserReadDto customer;
-    RequestStatus status;
-    String cargoDetails;
-    BigDecimal weight;
-    Integer palletCount;
-    Boolean refrigerated;
-    String pickupAddress;
-    String deliveryAddress;
-    LocalDate creationDate;
-    UserReadDto carrier;
+    private Long id;
+    private UserReadDto customer;
+    private RequestStatus status;
+    private String cargoDetails;
+    private BigDecimal weight;
+    private Integer palletCount;
+    private Boolean refrigerated;
+    private String pickupAddress;
+    private String deliveryAddress;
+    private LocalDate creationDate;
+    private UserReadDto carrier;
 }

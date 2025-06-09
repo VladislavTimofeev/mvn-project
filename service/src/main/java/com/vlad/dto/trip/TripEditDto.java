@@ -1,16 +1,21 @@
 package com.vlad.dto.trip;
 
 import com.vlad.entity.TripStatus;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.time.LocalDate;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TripEditDto {
-    Long requestId;
-    Long vehicleId;
-    Long driverId;
-    LocalDate departureTime;
-    LocalDate arrivalTime;
-    TripStatus status;
+    private Long requestId;
+    private Long vehicleId;
+    private Long driverId;
+    private LocalDate departureTime;
+    private LocalDate arrivalTime;
+    private TripStatus status;
 }

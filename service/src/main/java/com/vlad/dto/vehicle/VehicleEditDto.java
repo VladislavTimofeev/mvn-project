@@ -1,15 +1,19 @@
 package com.vlad.dto.vehicle;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class VehicleEditDto {
-    Long carrierId;
-    String licensePlate;
-    BigDecimal capacity;
-    Integer palletCapacity;
-    Boolean refrigerated;
-    String model;
+    private Long carrierId;
+    private String licensePlate;
+    private BigDecimal capacity;
+    private Integer palletCapacity;
+    private Boolean refrigerated;
+    private String model;
 }

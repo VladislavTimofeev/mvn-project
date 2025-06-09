@@ -2,19 +2,23 @@ package com.vlad.dto.trip;
 
 import com.vlad.entity.TripStatus;
 import jakarta.validation.constraints.NotNull;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TripCreateDto {
     @NotNull
-    Long requestId;
+    private Long requestId;
     @NotNull
-    Long vehicleId;
+    private Long vehicleId;
     @NotNull
-    Long driverId;
-    LocalDate departureTime;
-    LocalDate arrivalTime;
-    TripStatus status;
+    private Long driverId;
+    private LocalDate departureTime;
+    private LocalDate arrivalTime;
+    private TripStatus status;
 }

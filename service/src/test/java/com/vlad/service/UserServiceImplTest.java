@@ -4,9 +4,9 @@ import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.Role;
 import com.vlad.entity.User;
-import com.vlad.mapper.UserCreateEditMapper;
-import com.vlad.mapper.UserReadMapper;
+import com.vlad.mapper.UserMapper;
 import com.vlad.repository.UserRepository;
+import com.vlad.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,20 +31,16 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-class UserServiceTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
     @Mock
-    private UserCreateEditMapper userCreateEditMapper;
+    private UserMapper userMapper;
     @Mock
-    private UserReadMapper userReadMapper;
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
-    private UserService userService;
-
-    @Test
-    void findAll() {
-    }
+    private UserServiceImpl userServiceImpl;
 
     @Test
     void findByIdShouldReturnUserWhenExists() {
@@ -57,14 +55,14 @@ class UserServiceTest {
                 .build();
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(userReadMapper.map(user)).thenReturn(userReadDto);
+        when(userMapper.toDto(user)).thenReturn(userReadDto);
 
-        Optional<UserReadDto> actualResult = userService.findById(user.getId());
+        Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(userReadDto);
         verify(userRepository, times(1)).findById(user.getId());
-        verify(userReadMapper, times(1)).map(user);
+        verify(userMapper, times(1)).toDto(user);
     }
 
     @Test
@@ -80,11 +78,11 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        Optional<UserReadDto> actualResult = userService.findById(user.getId());
+        Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
 
         assertThat(actualResult).isNotPresent();
         verify(userRepository, times(1)).findById(user.getId());
-        verifyNoMoreInteractions(userReadMapper);
+        verifyNoMoreInteractions(userMapper);
     }
 
     @Test
@@ -99,20 +97,24 @@ class UserServiceTest {
                 .address("Pushkina 31-2")
                 .role(Role.ADMIN)
                 .build();
+        User userWithEncodedPassword = User.builder()
+                .password("encoded-password")
+                .role(Role.ADMIN)
+                .build();
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
-        when(userCreateEditMapper.map(userCreateEditDto)).thenReturn(user);
-        when(userRepository.save(user)).thenReturn(user);
-        when(userReadMapper.map(user)).thenReturn(userReadDto);
+        when(userMapper.toEntity(userCreateEditDto)).thenReturn(user);
+        when(passwordEncoder.encode("123gg")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenReturn(userWithEncodedPassword);
+        when(userMapper.toDto(userWithEncodedPassword)).thenReturn(userReadDto);
 
-        UserReadDto actualResult = userService.save(userCreateEditDto);
+        UserReadDto actualResult = userServiceImpl.save(userCreateEditDto);
 
         assertThat(actualResult).isNotNull();
-        assertThat(actualResult.getId()).isEqualTo(user.getId());
-        assertThat(actualResult.getUsername()).isEqualTo(user.getUsername());
-        assertThat(actualResult.getRole()).isEqualTo(user.getRole());
-        verify(userCreateEditMapper, times(1)).map(userCreateEditDto);
-        verify(userRepository, times(1)).save(user);
-        verify(userReadMapper, times(1)).map(user);
+        assertThat(actualResult.getUsername()).isEqualTo("vlad@gmail.com");
+        assertThat(actualResult.getRole()).isEqualTo(Role.ADMIN);
+        verify(passwordEncoder, times(1)).encode("123gg");
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(userMapper).toDto(userWithEncodedPassword);
     }
 
     @Test
@@ -127,29 +129,20 @@ class UserServiceTest {
                 .address("Pushkina 31-2")
                 .role(Role.ADMIN)
                 .build();
-        User updatedUser = User.builder()
-                .id(1L)
-                .username("masha@gmail.com")
-                .password("123gg")
-                .name("Maria")
-                .contactInfo("77889900")
-                .address("Pushkina 66-1")
-                .role(Role.CUSTOMER)
-                .build();
         UserReadDto expectedUserReadDto = new UserReadDto(1L, "masha@gmail.com", "Maria", "77889900", "Pushkina 66-1", Role.CUSTOMER);
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
-        when(userCreateEditMapper.map(userCreateEditDto, existingUser)).thenReturn(updatedUser);
-        when(userRepository.saveAndFlush(updatedUser)).thenReturn(updatedUser);
-        when(userReadMapper.map(updatedUser)).thenReturn(expectedUserReadDto);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode("123gg")).thenReturn("encoded-new-password");
+        when(userRepository.saveAndFlush(existingUser)).thenReturn(existingUser);
+        when(userMapper.toDto(existingUser)).thenReturn(expectedUserReadDto);
 
-        Optional<UserReadDto> actualResult = userService.update(1L, userCreateEditDto);
+        Optional<UserReadDto> actualResult = userServiceImpl.update(1L, userCreateEditDto);
 
-        assertThat(actualResult).isPresent();
-        assertThat(actualResult).contains(expectedUserReadDto);
-        verify(userRepository, times(1)).findById(existingUser.getId());
-        verify(userCreateEditMapper, times(1)).map(userCreateEditDto, existingUser);
-        verify(userRepository, times(1)).saveAndFlush(updatedUser);
-        verify(userReadMapper, times(1)).map(updatedUser);
+        assertThat(actualResult).isPresent().contains(expectedUserReadDto);
+        verify(userRepository, times(1)).findById(1L);
+        verify(userMapper, times(1)).updateEntityFromDto(userCreateEditDto, existingUser);
+        verify(passwordEncoder).encode("123gg");
+        verify(userRepository, times(1)).saveAndFlush(existingUser);
+        verify(userMapper).toDto(existingUser);
     }
 
     @Test
@@ -164,7 +157,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        boolean actualResult = userService.delete(user.getId());
+        boolean actualResult = userServiceImpl.delete(user.getId());
 
         assertThat(actualResult).isTrue();
         verify(userRepository, times(1)).findById(user.getId());
@@ -184,7 +177,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        boolean actualResult = userService.delete(user.getId());
+        boolean actualResult = userServiceImpl.delete(user.getId());
 
         assertThat(actualResult).isFalse();
         verify(userRepository, times(1)).findById(user.getId());
@@ -207,7 +200,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
 
-        UserDetails userDetails = userService.loadUserByUsername(username);
+        UserDetails userDetails = userServiceImpl.loadUserByUsername(username);
 
         assertNotNull(userDetails, "UserDetails не должен быть null");
         assertEquals(username, userDetails.getUsername());
