@@ -3,7 +3,7 @@ package com.vlad.http.controller;
 import com.vlad.annotation.IT;
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.entity.Role;
-import com.vlad.service.UserService;
+import com.vlad.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerIT {
 
     private final MockMvc mockMvc;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @BeforeEach
     void init() {
@@ -98,7 +97,7 @@ class UserControllerIT {
 
     @Test
     void delete() throws Exception {
-        when(userService.delete(1L)).thenReturn(true);
+        when(userServiceImpl.delete(1L)).thenReturn(true);
         mockMvc.perform(post("/users/1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"));

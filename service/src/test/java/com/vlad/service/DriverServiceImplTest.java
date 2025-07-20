@@ -13,6 +13,7 @@ import com.vlad.mapper.DriverEditMapper;
 import com.vlad.mapper.DriverReadMapper;
 import com.vlad.mapper.UserCreateEditMapper;
 import com.vlad.repository.DriverRepository;
+import com.vlad.service.impl.DriverServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-class DriverServiceTest {
+class DriverServiceImplTest {
 
     @Mock
     private DriverRepository driverRepository;
@@ -46,7 +47,7 @@ class DriverServiceTest {
     @Mock
     private UserCreateEditMapper userMapper;
     @InjectMocks
-    private DriverService driverService;
+    private DriverServiceImpl driverServiceImpl;
 
     @Test
     void findAllShouldReturnListOfDrivers() {
@@ -62,7 +63,7 @@ class DriverServiceTest {
         doReturn(driverReadDto2).when(driverReadMapper).map(driver2);
         doReturn(driverReadDto3).when(driverReadMapper).map(driver3);
 
-        List<DriverReadDto> actualResult = driverService.findAll();
+        List<DriverReadDto> actualResult = driverServiceImpl.findAll();
 
         assertThat(actualResult).hasSize(3);
         verify(driverRepository, times(1)).findAll();
@@ -78,7 +79,7 @@ class DriverServiceTest {
         doReturn(Optional.of(driver)).when(driverRepository).findById(driver.getId());
         doReturn(driverReadDto).when(driverReadMapper).map(driver);
 
-        Optional<DriverReadDto> actualResult = driverService.findById(driver.getId());
+        Optional<DriverReadDto> actualResult = driverServiceImpl.findById(driver.getId());
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult.get()).isEqualTo(driverReadDto);
@@ -91,7 +92,7 @@ class DriverServiceTest {
         Driver driver = getDriver(1L, "Alexander");
         doReturn(Optional.empty()).when(driverRepository).findById(driver.getId());
 
-        Optional<DriverReadDto> actualResult = driverService.findById(driver.getId());
+        Optional<DriverReadDto> actualResult = driverServiceImpl.findById(driver.getId());
 
         assertThat(actualResult).isNotPresent();
         verify(driverRepository, times(1)).findById(driver.getId());
@@ -107,7 +108,7 @@ class DriverServiceTest {
         when(driverRepository.save(driver)).thenReturn(driver);
         when(driverReadMapper.map(driver)).thenReturn(driverReadDto);
 
-        DriverReadDto actualResult = driverService.save(driverCreateDto);
+        DriverReadDto actualResult = driverServiceImpl.save(driverCreateDto);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isEqualTo(driverReadDto.getId());
@@ -130,7 +131,7 @@ class DriverServiceTest {
         when(driverRepository.saveAndFlush(updatedDriver)).thenReturn(updatedDriver);
         when(driverReadMapper.map(updatedDriver)).thenReturn(expectedDriverReadDto);
 
-        Optional<DriverReadDto> actualResult = driverService.update(1L, driverEditDto);
+        Optional<DriverReadDto> actualResult = driverServiceImpl.update(1L, driverEditDto);
 
         assertThat(actualResult).isPresent();
         assertThat(actualResult).contains(expectedDriverReadDto);
@@ -145,7 +146,7 @@ class DriverServiceTest {
         Driver driver = getDriver(1L, "Alexander");
         when(driverRepository.findById(driver.getId())).thenReturn(Optional.of(driver));
 
-        boolean actualResult = driverService.delete(driver.getId());
+        boolean actualResult = driverServiceImpl.delete(driver.getId());
 
         assertThat(actualResult).isTrue();
         verify(driverRepository, times(1)).findById(driver.getId());
@@ -158,7 +159,7 @@ class DriverServiceTest {
         Driver driver = getDriver(1L, "Alexander");
         when(driverRepository.findById(driver.getId())).thenReturn(Optional.empty());
 
-        boolean actualResult = driverService.delete(driver.getId());
+        boolean actualResult = driverServiceImpl.delete(driver.getId());
 
         assertThat(actualResult).isFalse();
         verify(driverRepository, times(1)).findById(driver.getId());
