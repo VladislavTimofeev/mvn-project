@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,11 +44,7 @@ class UserServiceImplTest {
 
     @Test
     void findAll() {
-    }
-
-    @Test
-    void findByIdShouldReturnUserWhenExists() {
-        User user = User.builder()
+        User user1 = User.builder()
                 .id(1L)
                 .username("vlad@gmail.com")
                 .password("123gg")
@@ -56,6 +53,42 @@ class UserServiceImplTest {
                 .address("Pushkina 31-2")
                 .role(Role.ADMIN)
                 .build();
+        User user2 = User.builder()
+                .id(2L)
+                .username("sveta@gmail.com")
+                .password("1543рв")
+                .name("Sveta")
+                .contactInfo("6654376")
+                .address("Lobonka 62-1")
+                .role(Role.ADMIN)
+                .build();
+        User user3 = User.builder()
+                .id(3L)
+                .username("petr@gmail.com")
+                .password("95475")
+                .name("Petr")
+                .contactInfo("0167543")
+                .address("Odincova 63-1")
+                .role(Role.ADMIN)
+                .build();
+        List<User> users = List.of(user1, user2, user3);
+        UserReadDto dto1 = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
+        UserReadDto dto2 = new UserReadDto(2L, "sveta@gmail.com", "Sveta", "6654376", "Lobonka 62-1", Role.ADMIN);
+        UserReadDto dto3 = new UserReadDto(3L, "petr@gmail.com", "Petr", "0167543", "Odincova 63-1", Role.ADMIN);
+        when(userRepository.findAll()).thenReturn(users);
+        when(userReadMapper.map(user1)).thenReturn(dto1);
+        when(userReadMapper.map(user2)).thenReturn(dto2);
+        when(userReadMapper.map(user3)).thenReturn(dto3);
+
+        List<UserReadDto> actualResult = userServiceImpl.findAll();
+
+        assertThat(actualResult)
+                .containsExactlyInAnyOrder(dto1, dto2, dto3);
+    }
+
+    @Test
+    void findByIdShouldReturnUserWhenExists() {
+        User user = getUser(1L, "vlad@gmail.com", "Vladik");
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userReadMapper.map(user)).thenReturn(userReadDto);
@@ -70,15 +103,7 @@ class UserServiceImplTest {
 
     @Test
     void findByIdShouldReturnEmptyWhenUserDoesNotExists() {
-        User user = User.builder()
-                .id(1L)
-                .username("vlad@gmail.com")
-                .password("123gg")
-                .name("Vladik")
-                .contactInfo("22334455")
-                .address("Pushkina 31-2")
-                .role(Role.ADMIN)
-                .build();
+        User user = getUser(1L, "vlad@gmail.com", "Vladik");
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         Optional<UserReadDto> actualResult = userServiceImpl.findById(user.getId());
@@ -91,15 +116,7 @@ class UserServiceImplTest {
     @Test
     void shouldSaveAndReturnUser() {
         UserCreateEditDto userCreateEditDto = new UserCreateEditDto("vlad@gmail.com", "123gg", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
-        User user = User.builder()
-                .id(1L)
-                .username("vlad@gmail.com")
-                .password("123gg")
-                .name("Vladik")
-                .contactInfo("22334455")
-                .address("Pushkina 31-2")
-                .role(Role.ADMIN)
-                .build();
+        User user = getUser(1L, "vlad@gmail.com", "Vladik");
         UserReadDto userReadDto = new UserReadDto(1L, "vlad@gmail.com", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
         when(userCreateEditMapper.map(userCreateEditDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(user);
@@ -119,15 +136,7 @@ class UserServiceImplTest {
     @Test
     void shouldUpdateExistingUser() {
         UserCreateEditDto userCreateEditDto = new UserCreateEditDto("vlad@gmail.com", "123gg", "Vladik", "22334455", "Pushkina 31-2", Role.ADMIN);
-        User existingUser = User.builder()
-                .id(1L)
-                .username("vlad@gmail.com")
-                .password("123gg")
-                .name("Vladik")
-                .contactInfo("22334455")
-                .address("Pushkina 31-2")
-                .role(Role.ADMIN)
-                .build();
+        User existingUser = getUser(1L, "vlad@gmail.com", "Vladik");
         User updatedUser = User.builder()
                 .id(1L)
                 .username("masha@gmail.com")
@@ -155,14 +164,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteShouldReturnTrueWhenUserExists() {
-        User user = User.builder()
-                .id(1L)
-                .username("vlad@gmail.com")
-                .password("123gg")
-                .name("Vladik")
-                .contactInfo("22334455")
-                .address("Lobonka 22-22")
-                .build();
+        User user = getUser(1L, "vlad@gmail.com", "Vladik");
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         boolean actualResult = userServiceImpl.delete(user.getId());
@@ -175,14 +177,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteShouldReturnFalseWhenUserNotFound() {
-        User user = User.builder()
-                .id(1L)
-                .username("vlad@gmail.com")
-                .password("123gg")
-                .name("Vladik")
-                .contactInfo("22334455")
-                .address("Lobonka 22-22")
-                .build();
+        User user = getUser(1L, "vlad@gmail.com", "Vladik");
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         boolean actualResult = userServiceImpl.delete(user.getId());
@@ -215,5 +210,17 @@ class UserServiceImplTest {
         assertEquals(password, userDetails.getPassword());
         assertTrue(userDetails.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals(role.name())));
+    }
+
+    private static User getUser(Long id, String username, String name) {
+        return User.builder()
+                .id(1L)
+                .username("vlad@gmail.com")
+                .password("123gg")
+                .name("Vladik")
+                .contactInfo("22334455")
+                .address("Pushkina 31-2")
+                .role(Role.ADMIN)
+                .build();
     }
 }
