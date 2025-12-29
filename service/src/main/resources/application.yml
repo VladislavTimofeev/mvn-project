@@ -3,7 +3,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: pass
-    url: jdbc:postgresql://localhost:5433/logistics
+    url: jdbc:postgresql://localhost:5433/mvn_project
   jpa:
     open-in-view: false
     properties:
