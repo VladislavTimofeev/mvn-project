@@ -4,7 +4,7 @@ import com.vlad.dto.PageResponse;
 import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
-import com.vlad.service.impl.UserServiceImpl;
+import com.vlad.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,36 +26,36 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class UserRestController {
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     @GetMapping
     public PageResponse findAll(UserFilterDto filter, Pageable pageable) {
-        Page<UserReadDto> page = userServiceImpl.findAll(filter, pageable);
+        Page<UserReadDto> page = userService.findAll(filter, pageable);
         return PageResponse.of(page);
     }
 
     @GetMapping("/{id}")
     public UserReadDto findById(@PathVariable("id") Long id) {
-        return userServiceImpl.findById(id)
+        return userService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserReadDto save(@Validated @RequestBody UserCreateEditDto user) {
-        return userServiceImpl.save(user);
+        return userService.save(user);
     }
 
     @PutMapping("/{id}")
     public UserReadDto update(@PathVariable("id") Long id, @RequestBody UserCreateEditDto user) {
-        return userServiceImpl.update(id, user)
+        return userService.update(id, user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) {
-        if (!userServiceImpl.delete(id)) {
+        if (!userService.delete(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
