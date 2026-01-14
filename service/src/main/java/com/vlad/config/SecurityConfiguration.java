@@ -33,7 +33,7 @@ public class SecurityConfiguration {
         return http
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/login/**", "/users/registration", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/login/**", "/users", "/users/registration", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/drivers/create").hasAuthority(CARRIER.getAuthority())
                         .requestMatchers("/vehicles/create").hasAuthority(CARRIER.getAuthority())
                         .requestMatchers("trips/create").hasAuthority(CARRIER.getAuthority())
