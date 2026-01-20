@@ -1,17 +1,18 @@
 package com.vlad.http.rest;
 
+import com.vlad.dto.PageResponse;
 import com.vlad.dto.driver.DriverCreateDto;
 import com.vlad.dto.driver.DriverEditDto;
 import com.vlad.dto.driver.DriverReadDto;
+import com.vlad.dto.filter.DriverFilterDto;
 import com.vlad.exception.api.ApiException;
 import com.vlad.exception.error.ErrorCode;
 import com.vlad.service.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/drivers")
@@ -21,8 +22,8 @@ public class DriverRestController {
     private final DriverService driverService;
 
     @GetMapping
-    public List<DriverReadDto> findAll() {
-        return driverService.findAll();
+    public PageResponse<DriverReadDto> findAll(DriverFilterDto driverFilterDto, Pageable pageable) {
+        return PageResponse.of(driverService.findAll(driverFilterDto, pageable));
     }
 
     @GetMapping("/{id}")
