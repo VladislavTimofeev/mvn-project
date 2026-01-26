@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,6 +39,13 @@ public class DriverServiceImpl implements DriverService {
                 .buildAnd();
         return driverRepository.findAll(predicate, pageable)
                 .map(driverReadMapper::map);
+    }
+
+    @Override
+    public List<DriverReadDto> findAll() {
+        return driverRepository.findAll().stream()
+                .map(driverReadMapper::map)
+                .toList();
     }
 
     @Override

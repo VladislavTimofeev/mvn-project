@@ -22,3 +22,8 @@ spring:
               - openid
               - profile
               - email
+jwt:
+  secret: thisIsMysecregtfrdesww233eggtffeeddgkjjhhtdhttebd54ndhdhfhhhshs8877465sbbdd
+  expiration: 3600000
+  refresh-expiration: 604800000
+  issuer: transport-app
