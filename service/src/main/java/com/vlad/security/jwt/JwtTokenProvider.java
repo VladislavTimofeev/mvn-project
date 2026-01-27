@@ -53,6 +53,19 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateTokenFromUsername(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtProperties.getExpiration());
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .setIssuer(jwtProperties.getIssuer())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public Long getExpirationTime() {
         return jwtProperties.getExpiration() / 1000;
     }

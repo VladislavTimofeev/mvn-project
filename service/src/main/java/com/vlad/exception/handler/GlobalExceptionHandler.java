@@ -74,13 +74,18 @@ public class GlobalExceptionHandler {
             // === Validation errors ===
             case VALIDATION_FAILED, TRIP_STATUS_INVALID -> HttpStatus.BAD_REQUEST;
 
+            // === Authentication errors ===
+            case INVALID_CREDENTIALS, INVALID_TOKEN -> HttpStatus.UNAUTHORIZED;
+
+            case ACCESS_DENIED -> HttpStatus.FORBIDDEN;
+
             // === Resource not found ===
             case RESOURCE_NOT_FOUND, VEHICLE_NOT_FOUND, DRIVER_NOT_FOUND, TRIP_NOT_FOUND, REQUEST_NOT_FOUND ->
                     HttpStatus.NOT_FOUND;
 
             // === Conflicts / duplicates ===
-            case VEHICLE_ALREADY_EXISTS, DRIVER_ALREADY_EXISTS, TRIP_ALREADY_EXISTS,REQUEST_ALREADY_EXISTS ->
-                    HttpStatus.CONFLICT;
+            case VEHICLE_ALREADY_EXISTS, DRIVER_ALREADY_EXISTS, TRIP_ALREADY_EXISTS, REQUEST_ALREADY_EXISTS,
+                 USER_ALREADY_EXISTS -> HttpStatus.CONFLICT;
 
             // === Fallback ===
             default -> HttpStatus.INTERNAL_SERVER_ERROR;

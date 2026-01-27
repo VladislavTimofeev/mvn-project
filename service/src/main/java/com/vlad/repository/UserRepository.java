@@ -12,4 +12,5 @@ public interface UserRepository extends
         QuerydslPredicateExecutor<User> {
 
     Optional<User> findByUsername(String username);
+    boolean existsByUsername(String username);
 }

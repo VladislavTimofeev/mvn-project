@@ -14,6 +14,12 @@ public enum ErrorCode {
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
 
+    // ===== AUTH =====
+    USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "User with this username already exists"),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid username or password"),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid or expired token"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
+
     // ===== VEHICLE =====
     VEHICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "Vehicle not found"),
     VEHICLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Vehicle already exists"),
