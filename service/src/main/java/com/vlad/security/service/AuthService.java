@@ -5,11 +5,9 @@ import com.vlad.entity.User;
 import com.vlad.exception.api.ApiException;
 import com.vlad.exception.error.ErrorCode;
 import com.vlad.repository.UserRepository;
-import com.vlad.security.auth.AuthRequestDto;
-import com.vlad.security.auth.AuthResponseDto;
-import com.vlad.security.auth.RefreshTokenRequestDto;
-import com.vlad.security.auth.RegisterRequestDto;
+import com.vlad.security.auth.*;
 import com.vlad.security.jwt.JwtTokenProvider;
+import com.vlad.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +29,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
     private static final String BEARER = "Bearer";
 
     @Transactional
@@ -98,10 +97,36 @@ public class AuthService {
         }
     }
 
+    public void logout(LogoutRequestDto request) {
+        String accessToken = request.getAccessToken();
+        String refreshToken = request.getRefreshToken();
+
+        try {
+            if (!jwtTokenProvider.validateToken(accessToken)) {
+                throw new ApiException(ErrorCode.INVALID_TOKEN);
+            }
+
+            String username = jwtTokenProvider.getUsername(accessToken);
+
+            tokenBlacklistService.blacklistToken(accessToken, username);
+            tokenBlacklistService.blacklistToken(refreshToken, username);
+
+            log.info("User '{}' logged out successfully", username);
+        } catch (Exception e) {
+            log.error("Logout failed: {}", e.getMessage());
+            throw new ApiException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
     public AuthResponseDto refreshToken(RefreshTokenRequestDto request) {
         String refreshToken = request.getRefreshToken();
 
         log.info("Refresh token request received");
+
+        if (tokenBlacklistService.isBlacklisted(refreshToken)) {
+            log.warn("Attempted to refresh using blacklisted token");
+            throw new ApiException(ErrorCode.INVALID_TOKEN);
+        }
 
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             log.warn("Invalid refresh token");
