@@ -5,14 +5,14 @@ import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
+import com.vlad.exception.api.ApiException;
+import com.vlad.exception.error.ErrorCode;
 import com.vlad.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v2/vehicles")
@@ -23,14 +23,13 @@ public class VehicleRestController {
 
     @GetMapping
     public PageResponse<VehicleReadDto> findAll(VehicleFilterDto filter, Pageable pageable) {
-        Page<VehicleReadDto> page = vehicleService.findAll(filter, pageable);
-        return PageResponse.of(page);
+        return PageResponse.of(vehicleService.findAll(filter, pageable));
     }
 
     @GetMapping("/{id}")
     public VehicleReadDto findById(@PathVariable Long id) {
         return vehicleService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(ErrorCode.VEHICLE_NOT_FOUND));
     }
 
     @PostMapping
@@ -42,14 +41,14 @@ public class VehicleRestController {
     @PutMapping("/{id}")
     public VehicleReadDto update(@PathVariable Long id, @Valid @RequestBody VehicleEditDto vehicleEditDto) {
         return vehicleService.update(id, vehicleEditDto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(ErrorCode.VEHICLE_NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         if (!vehicleService.delete(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ApiException(ErrorCode.VEHICLE_NOT_FOUND);
         }
     }
 }
