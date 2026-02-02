@@ -70,6 +70,10 @@ public class JwtTokenProvider {
         return jwtProperties.getExpiration() / 1000;
     }
 
+    public Date getExpirationDate(String token) {
+        return parseClaims(token).getExpiration();
+    }
+
     public String getUsername(String token) {
         return parseClaims(token).getSubject();
     }

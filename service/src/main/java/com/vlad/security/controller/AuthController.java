@@ -1,9 +1,6 @@
 package com.vlad.security.controller;
 
-import com.vlad.security.auth.AuthRequestDto;
-import com.vlad.security.auth.AuthResponseDto;
-import com.vlad.security.auth.RefreshTokenRequestDto;
-import com.vlad.security.auth.RegisterRequestDto;
+import com.vlad.security.auth.*;
 import com.vlad.security.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,16 @@ public class AuthController {
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto request) {
         AuthResponseDto response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Logout endpoint
+     * POST /api/v2/auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDto request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 
     /**
