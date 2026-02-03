@@ -20,40 +20,24 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * Login endpoint
-     * POST /api/v2/auth/login
-     */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto request) {
         AuthResponseDto response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Logout endpoint
-     * POST /api/v2/auth/logout
-     */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDto request) {
         authService.logout(request);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Register endpoint
-     * POST /api/v2/auth/register
-     */
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterRequestDto request) {
         AuthResponseDto response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Refresh token endpoint
-     * POST /api/v2/auth/refresh
-     */
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
         AuthResponseDto response = authService.refreshToken(request);

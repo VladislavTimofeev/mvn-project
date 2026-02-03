@@ -4,8 +4,6 @@ import com.vlad.dto.PageResponse;
 import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.dto.request.RequestCreateEditDto;
 import com.vlad.dto.request.RequestReadDto;
-import com.vlad.exception.api.ApiException;
-import com.vlad.exception.error.ErrorCode;
 import com.vlad.service.RequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +25,7 @@ public class RequestRestController {
 
     @GetMapping("/{id}")
     public RequestReadDto findById(@PathVariable Long id) {
-        return requestService.findById(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.REQUEST_NOT_FOUND));
+        return requestService.findById(id);
     }
 
     @PostMapping
@@ -40,15 +37,12 @@ public class RequestRestController {
     @PutMapping("/{id}")
     public RequestReadDto update(@PathVariable Long id,
                                  @Valid @RequestBody RequestCreateEditDto request) {
-        return requestService.update(id, request)
-                .orElseThrow(() -> new ApiException(ErrorCode.REQUEST_NOT_FOUND));
+        return requestService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        if (!requestService.delete(id)) {
-            throw new ApiException(ErrorCode.REQUEST_NOT_FOUND);
-        }
+        requestService.delete(id);
     }
 }

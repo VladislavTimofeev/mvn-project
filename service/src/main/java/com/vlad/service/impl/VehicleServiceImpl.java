@@ -6,6 +6,9 @@ import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
 import com.vlad.entity.QVehicle;
+import com.vlad.entity.Vehicle;
+import com.vlad.exception.api.ApiException;
+import com.vlad.exception.error.ErrorCode;
 import com.vlad.mapper.VehicleCreateMapper;
 import com.vlad.mapper.VehicleEditMapper;
 import com.vlad.mapper.VehicleReadMapper;
@@ -13,13 +16,13 @@ import com.vlad.repository.QPredicate;
 import com.vlad.repository.VehicleRepository;
 import com.vlad.service.VehicleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,39 +47,63 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Optional<VehicleReadDto> findById(Long id) {
-        return vehicleRepository.findById(id)
-                .map(vehicleReadMapper::map);
+    public VehicleReadDto findById(Long id) {
+        log.debug("Finding vehicle by id: {}", id);
+        return vehicleReadMapper.map(getVehicleOrThrow(id));
     }
 
     @Override
     @Transactional
     public VehicleReadDto save(VehicleCreateDto vehicleCreateDto) {
-        return Optional.of(vehicleCreateDto)
-                .map(vehicleCreateMapper::map)
-                .map(vehicleRepository::save)
-                .map(vehicleReadMapper::map)
-                .orElseThrow();
+        log.info("Creating new vehicle: {}", vehicleCreateDto.getModel());
+
+        Vehicle vehicle = vehicleCreateMapper.map(vehicleCreateDto);
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+
+        log.info("Vehicle created successfully with id: {}", savedVehicle.getId());
+
+        return vehicleReadMapper.map(savedVehicle);
     }
 
     @Override
     @Transactional
-    public Optional<VehicleReadDto> update(Long id, VehicleEditDto vehicleEditDto) {
-        return vehicleRepository.findById(id)
-                .map(entity -> vehicleEditMapper.map(vehicleEditDto, entity))
-                .map(vehicleRepository::saveAndFlush)
-                .map(vehicleReadMapper::map);
+    public VehicleReadDto update(Long id, VehicleEditDto vehicleEditDto) {
+        log.info("Updating vehicle with id: {}", id);
+
+        Vehicle vehicle = getVehicleOrThrow(id);
+
+        if (!vehicle.getLicensePlate().equals(vehicleEditDto.getLicensePlate())
+                && vehicleRepository.existsByLicensePlate(vehicleEditDto.getLicensePlate())) {
+            log.warn("License plate already taken: {}", vehicleEditDto.getLicensePlate());
+            throw new ApiException(ErrorCode.VEHICLE_ALREADY_EXISTS);
+        }
+
+        Vehicle updatedVehicle = vehicleEditMapper.map(vehicleEditDto, vehicle);
+        Vehicle savedVehicle = vehicleRepository.saveAndFlush(updatedVehicle);
+
+        log.info("Vehicle updated successfully with id: {}", savedVehicle.getId());
+
+        return vehicleReadMapper.map(savedVehicle);
     }
 
     @Override
     @Transactional
-    public boolean delete(Long id) {
+    public void delete(Long id) {
+        log.info("Deleting vehicle with id: {}", id);
+
+        Vehicle vehicle = getVehicleOrThrow(id);
+
+        vehicleRepository.delete(vehicle);
+        vehicleRepository.flush();
+
+        log.info("Vehicle deleted successfully with id: {}", id);
+    }
+
+    private Vehicle getVehicleOrThrow(Long id) {
         return vehicleRepository.findById(id)
-                .map(entity -> {
-                    vehicleRepository.delete(entity);
-                    vehicleRepository.flush();
-                    return true;
-                })
-                .orElse(false);
+                .orElseThrow(() -> {
+                    log.warn("Vehicle not found with id: {}", id);
+                    return new ApiException(ErrorCode.VEHICLE_NOT_FOUND);
+                });
     }
 }

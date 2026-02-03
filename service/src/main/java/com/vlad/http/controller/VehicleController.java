@@ -9,7 +9,6 @@ import com.vlad.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/vehicles")
@@ -36,13 +34,10 @@ public class VehicleController {
     }
 
     @GetMapping({"/{id}"})
-    public String findById(@PathVariable("id") Long id, Model model) {
-        return vehicleService.findById(id)
-                .map(vehicle -> {
-                    model.addAttribute("vehicle", vehicle);
-                    return "vehicle/vehicle";
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String findById(@PathVariable Long id, Model model) {
+        VehicleReadDto vehicle = vehicleService.findById(id);
+        model.addAttribute("vehicle", vehicle);
+        return "vehicle/vehicle";
     }
 
     @GetMapping("/create")
@@ -52,7 +47,9 @@ public class VehicleController {
     }
 
     @PostMapping
-    public String save(@ModelAttribute("vehicle") VehicleCreateDto vehicleCreateDto, Model model, BindingResult bindingResult) {
+    public String save(@ModelAttribute("vehicle") VehicleCreateDto vehicleCreateDto,
+                       BindingResult bindingResult,
+                       Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "vehicle/create";
@@ -62,17 +59,15 @@ public class VehicleController {
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable("id") Long id, @ModelAttribute("vehicle") VehicleEditDto vehicleEditDto) {
-        return vehicleService.update(id, vehicleEditDto)
-                .map(it -> "redirect:/vehicles/{id}")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String update(@PathVariable Long id,
+                         @ModelAttribute("vehicle") VehicleEditDto vehicleEditDto) {
+        vehicleService.update(id, vehicleEditDto);
+        return "redirect:/vehicles/{id}";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
-        if (!vehicleService.delete(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    public String delete(@PathVariable Long id) {
+        vehicleService.delete(id);
         return "redirect:/vehicles";
     }
 }

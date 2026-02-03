@@ -5,8 +5,6 @@ import com.vlad.dto.filter.VehicleFilterDto;
 import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
-import com.vlad.exception.api.ApiException;
-import com.vlad.exception.error.ErrorCode;
 import com.vlad.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +26,7 @@ public class VehicleRestController {
 
     @GetMapping("/{id}")
     public VehicleReadDto findById(@PathVariable Long id) {
-        return vehicleService.findById(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.VEHICLE_NOT_FOUND));
+        return vehicleService.findById(id);
     }
 
     @PostMapping
@@ -39,16 +36,14 @@ public class VehicleRestController {
     }
 
     @PutMapping("/{id}")
-    public VehicleReadDto update(@PathVariable Long id, @Valid @RequestBody VehicleEditDto vehicleEditDto) {
-        return vehicleService.update(id, vehicleEditDto)
-                .orElseThrow(() -> new ApiException(ErrorCode.VEHICLE_NOT_FOUND));
+    public VehicleReadDto update(@PathVariable Long id,
+                                 @Valid @RequestBody VehicleEditDto vehicleEditDto) {
+        return vehicleService.update(id, vehicleEditDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        if (!vehicleService.delete(id)) {
-            throw new ApiException(ErrorCode.VEHICLE_NOT_FOUND);
-        }
+        vehicleService.delete(id);
     }
 }
