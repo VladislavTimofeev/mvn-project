@@ -6,6 +6,7 @@ import com.vlad.dto.driver.DriverEditDto;
 import com.vlad.dto.driver.DriverReadDto;
 import com.vlad.dto.filter.DriverFilterDto;
 import com.vlad.service.DriverService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Drivers", description = "Driver management")
 @RestController
 @RequestMapping("/api/v2/drivers")
 @RequiredArgsConstructor

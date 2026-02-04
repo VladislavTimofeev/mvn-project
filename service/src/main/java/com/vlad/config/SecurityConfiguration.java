@@ -101,7 +101,9 @@ public class SecurityConfiguration {
         return http
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(LOGIN, "/welcome", "/users/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(LOGIN, "/welcome", "/users/**",
+                                "/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html")
+                        .permitAll()
                         .requestMatchers("/drivers/create").hasAuthority(CARRIER.getAuthority())
                         .requestMatchers("/vehicles/create").hasAuthority(CARRIER.getAuthority())
                         .requestMatchers("/trips/create").hasAuthority(CARRIER.getAuthority())
