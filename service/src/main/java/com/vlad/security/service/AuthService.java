@@ -4,9 +4,11 @@ import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.exception.api.ApiException;
 import com.vlad.exception.error.ErrorCode;
+import com.vlad.exception.ex.RateLimitExceededException;
 import com.vlad.repository.UserRepository;
 import com.vlad.security.auth.*;
 import com.vlad.security.jwt.JwtTokenProvider;
+import com.vlad.service.RateLimitService;
 import com.vlad.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final RateLimitService rateLimitService;
+
     private static final String BEARER = "Bearer";
 
     @Transactional
@@ -70,15 +74,33 @@ public class AuthService {
     }
 
     public AuthResponseDto login(AuthRequestDto request) {
-        log.info("Login attempt for user: {}", request.getUsername());
+        String username = request.getUsername();
+
+        log.info("Login attempt for user: {}", username);
+
+        if (rateLimitService.isBlocked(username)) {
+            long blockTimeRemaining = rateLimitService.getBlockTimeRemaining(username);
+            long minutesRemaining = blockTimeRemaining / 60;
+
+            log.warn("Login blocked for user: {}. Time remaining: {} seconds", username, blockTimeRemaining);
+
+            throw new RateLimitExceededException(
+                    String.format("Too many failed login attempts. Please try again in %d minute(s).",
+                            Math.max(1, minutesRemaining)),
+                    blockTimeRemaining
+            );
+        }
 
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
+                            username,
                             request.getPassword()
                     )
             );
+
+            rateLimitService.resetAttempts(username);
+
             log.info("User '{}' logged in successfully", request.getUsername());
 
             String accessToken = jwtTokenProvider.generateToken(authentication);
@@ -92,8 +114,27 @@ public class AuthService {
                     .build();
 
         } catch (BadCredentialsException e) {
-            log.warn("Failed login attempt for user: {}", request.getUsername());
-            throw new ApiException(ErrorCode.INVALID_CREDENTIALS);
+
+            int remainingAttempts = rateLimitService.recordFailedAttempt(username);
+
+            if (remainingAttempts == -1){
+                long blockTimeRemaining = rateLimitService.getBlockTimeRemaining(username);
+                long minutesRemaining = blockTimeRemaining / 60;
+
+                log.warn("Rate limit exceeded for user: {}. Blocked for {} seconds", username, blockTimeRemaining);
+
+                throw new RateLimitExceededException(
+                        String.format("Too many failed login attempts. Account locked for %d minute(s).",
+                                Math.max(1, minutesRemaining)),
+                        blockTimeRemaining
+                );
+            }
+            log.warn("Failed login attempt for user: {}. Remaining attempts: {}", username, remainingAttempts);
+
+            throw new ApiException(ErrorCode.INVALID_CREDENTIALS,
+                    String.format("Invalid username or password. %d attempt(s) remaining before account lock.",
+                            remainingAttempts)
+                    );
         }
     }
 
