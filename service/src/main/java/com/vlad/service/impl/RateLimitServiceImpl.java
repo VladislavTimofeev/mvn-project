@@ -25,7 +25,7 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     @Override
     public boolean isBlocked(String key) {
-        String blockKey = BLOCK + key;
+        String blockKey = buildBlockKey(key);
         Boolean isBlocked = redisTemplate.hasKey(blockKey);
 
         if (Boolean.TRUE.equals(isBlocked)) {
@@ -38,17 +38,8 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     @Override
     public int recordFailedAttempt(String key) {
-        String attemptKey = ATTEMPTS + key;
-
-        Long attempts = redisTemplate.opsForValue().increment(attemptKey);
-
-        if (attempts == null) {
-            attempts = 1L;
-        }
-
-        if (attempts == 1) {
-            redisTemplate.expire(attemptKey, Duration.ofMinutes(ATTEMPT_WINDOW_MINUTES));
-        }
+        String attemptKey = buildAttemptKey(key);
+        Long attempts = incrementAttempts(attemptKey);
 
         log.debug("Failed login attempt {} for key: {}", attempts, key);
 
@@ -62,21 +53,21 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     @Override
     public void resetAttempts(String key) {
-        String attemptKey = ATTEMPTS + key;
+        String attemptKey = buildAttemptKey(key);
         redisTemplate.delete(attemptKey);
         log.debug("Reset attempts for key: {}", key);
     }
 
     @Override
     public long getBlockTimeRemaining(String key) {
-        String blockKey = BLOCK + key;
+        String blockKey = buildBlockKey(key);
         Long ttl = redisTemplate.getExpire(blockKey, TimeUnit.SECONDS);
         return ttl != null ? ttl : 0;
     }
 
     @Override
     public int getRemainingAttempts(String key) {
-        String attemptKey = ATTEMPTS + key;
+        String attemptKey = buildAttemptKey(key);
         String attempts = redisTemplate.opsForValue().get(attemptKey);
 
         if (attempts == null) {
@@ -92,7 +83,26 @@ public class RateLimitServiceImpl implements RateLimitService {
         String attemptKey = ATTEMPTS + key;
 
         redisTemplate.delete(attemptKey);
-
         redisTemplate.opsForValue().set(blockKey, "blocked", Duration.ofMinutes(BLOCK_DURATION_MINUTES));
+    }
+
+    private Long incrementAttempts(String attemptKey) {
+        Long attempts = redisTemplate.opsForValue().increment(attemptKey);
+
+        if (attempts == null) {
+            attempts = 1L;
+        }
+        if (attempts == 1) {
+            redisTemplate.expire(attemptKey, Duration.ofMinutes(ATTEMPT_WINDOW_MINUTES));
+        }
+        return attempts;
+    }
+
+    private String buildBlockKey(String key) {
+        return BLOCK + key;
+    }
+
+    private String buildAttemptKey(String key) {
+        return ATTEMPTS + key;
     }
 }
