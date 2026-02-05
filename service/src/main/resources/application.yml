@@ -1,4 +1,18 @@
 spring:
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        transport:
+          protocol: smtp
+    test-connection: false
   data:
     redis:
       host: localhost
@@ -39,3 +53,9 @@ jwt:
   expiration: 3600000
   refresh-expiration: 604800000
   issuer: transport-app
+app:
+  verification:
+    token-expiration-hours: 24
+    base-url: http://localhost:8080
+    from-email: noreply@logistics.com
+    from-name: Logistics Management System

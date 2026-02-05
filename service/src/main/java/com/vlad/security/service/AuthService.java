@@ -8,6 +8,7 @@ import com.vlad.exception.ex.RateLimitExceededException;
 import com.vlad.repository.UserRepository;
 import com.vlad.security.auth.*;
 import com.vlad.security.jwt.JwtTokenProvider;
+import com.vlad.service.EmailVerificationService;
 import com.vlad.service.RateLimitService;
 import com.vlad.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
     private final RateLimitService rateLimitService;
+    private final EmailVerificationService emailVerificationService;
 
     private static final String BEARER = "Bearer";
 
@@ -47,7 +49,11 @@ public class AuthService {
 
         log.info("User registered successfully: {}", user.getUsername());
 
-        return generateAuthResponse(user.getUsername(), request.getPassword());
+        emailVerificationService.createAndSendVerificationToken(user);
+
+        return AuthResponseDto.builder()
+                .message("Registration successful. Please check your email to verify your account.")
+                .build();
     }
 
     public AuthResponseDto login(AuthRequestDto request) {
@@ -59,6 +65,15 @@ public class AuthService {
 
         try {
             Authentication authentication = authenticateUser(username, request.getPassword());
+
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+
+            if (!user.isEmailVerified()) {
+                log.warn("Login attempt with unverified email: {}", username);
+                throw new ApiException(ErrorCode.EMAIL_NOT_VERIFIED);
+            }
+
             rateLimitService.resetAttempts(username);
 
             log.info("User '{}' logged in successfully", username);

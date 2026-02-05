@@ -2,15 +2,13 @@ package com.vlad.security.controller;
 
 import com.vlad.security.auth.*;
 import com.vlad.security.service.AuthService;
+import com.vlad.service.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -19,6 +17,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
+
+    @GetMapping("/verify-email")
+    public VerifyEmailResponseDto verifyEmail(@RequestParam String token){
+        emailVerificationService.verifyEmail(token);
+        return VerifyEmailResponseDto.builder()
+                .message("Email verified successfully! You can now login.")
+                .verified(true)
+                .build();
+    }
+
+    @PostMapping("/resend-verification")
+    public VerifyEmailResponseDto resendVerification(@Valid @RequestBody ResendVerificationRequestDto request) {
+        emailVerificationService.resendVerificationEmail(request.getEmail());
+        return VerifyEmailResponseDto.builder()
+                .message("Verification email sent. Please check your inbox.")
+                .email(request.getEmail())
+                .build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto request) {

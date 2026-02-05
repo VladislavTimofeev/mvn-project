@@ -13,7 +13,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
-        HttpStatus status = mapErrorCodeToHttpStatus(ex.getErrorCode());
+        HttpStatus status = ex.getErrorCode().getHttpStatus();
 
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(OffsetDateTime.now())
@@ -103,25 +102,5 @@ public class GlobalExceptionHandler {
             return request.getRemoteAddr();
         }
         return xfHeader.split(",")[0];
-    }
-
-    private HttpStatus mapErrorCodeToHttpStatus(ErrorCode errorCode) {
-        return switch (errorCode) {
-            case VALIDATION_FAILED, TRIP_STATUS_INVALID -> HttpStatus.BAD_REQUEST;
-
-            case INVALID_CREDENTIALS, INVALID_TOKEN -> HttpStatus.UNAUTHORIZED;
-
-            case ACCESS_DENIED -> HttpStatus.FORBIDDEN;
-
-            case RESOURCE_NOT_FOUND, VEHICLE_NOT_FOUND, DRIVER_NOT_FOUND, TRIP_NOT_FOUND,
-                 REQUEST_NOT_FOUND, USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
-
-            case VEHICLE_ALREADY_EXISTS, DRIVER_ALREADY_EXISTS, TRIP_ALREADY_EXISTS, REQUEST_ALREADY_EXISTS,
-                 USER_ALREADY_EXISTS -> HttpStatus.CONFLICT;
-
-            case RATE_LIMIT_EXCEEDED -> HttpStatus.TOO_MANY_REQUESTS;
-
-            default -> HttpStatus.INTERNAL_SERVER_ERROR;
-        };
     }
 }
