@@ -5,12 +5,14 @@ import com.vlad.dto.filter.RequestFilterDto;
 import com.vlad.dto.request.RequestCreateEditDto;
 import com.vlad.dto.request.RequestReadDto;
 import com.vlad.service.RequestService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Requests", description = "Request management")
 @RestController
 @RequestMapping("/api/v2/requests")
 @RequiredArgsConstructor

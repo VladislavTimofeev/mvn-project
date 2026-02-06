@@ -6,12 +6,14 @@ import com.vlad.dto.vehicle.VehicleCreateDto;
 import com.vlad.dto.vehicle.VehicleEditDto;
 import com.vlad.dto.vehicle.VehicleReadDto;
 import com.vlad.service.VehicleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Vehicles", description = "Vehicle management")
 @RestController
 @RequestMapping("/api/v2/vehicles")
 @RequiredArgsConstructor

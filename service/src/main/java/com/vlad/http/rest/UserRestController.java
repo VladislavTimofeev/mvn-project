@@ -5,6 +5,7 @@ import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Users", description = "User management")
 @RestController
 @RequestMapping("/api/v2/users")
 @RequiredArgsConstructor
