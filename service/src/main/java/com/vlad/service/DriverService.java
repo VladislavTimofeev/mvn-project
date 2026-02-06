@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DriverService {
 
@@ -16,11 +15,11 @@ public interface DriverService {
 
     List<DriverReadDto> findAll();
 
-    Optional<DriverReadDto> findById(Long id);
+    DriverReadDto findById(Long id);
 
     DriverReadDto save(DriverCreateDto driverCreateDto);
 
-    Optional<DriverReadDto> update(Long id, DriverEditDto driverEditDto);
+    DriverReadDto update(Long id, DriverEditDto driverEditDto);
 
-    boolean delete(Long id);
+    void delete(Long id);
 }

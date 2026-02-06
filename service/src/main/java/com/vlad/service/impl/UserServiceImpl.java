@@ -5,15 +5,18 @@ import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserReadDto;
 import com.vlad.entity.QUser;
+import com.vlad.entity.User;
+import com.vlad.exception.api.ApiException;
+import com.vlad.exception.error.ErrorCode;
 import com.vlad.mapper.UserCreateEditMapper;
 import com.vlad.mapper.UserReadMapper;
 import com.vlad.repository.QPredicate;
 import com.vlad.repository.UserRepository;
 import com.vlad.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,8 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,50 +47,82 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public Optional<UserReadDto> findById(Long id) {
-        return userRepository.findById(id)
-                .map(userReadMapper::map);
+    public UserReadDto findById(Long id) {
+        log.debug("Finding user by id: {}", id);
+        return userReadMapper.map(getUserOrThrow(id));
     }
 
     @Override
     @Transactional
     public UserReadDto save(UserCreateEditDto userCreateEditDto) {
-        return Optional.of(userCreateEditDto)
-                .map(userCreateEditMapper::map)
-                .map(userRepository::save)
-                .map(userReadMapper::map)
-                .orElseThrow();
+        log.info("Creating new user: {}", userCreateEditDto.getUsername());
+
+        if (userRepository.existsByUsername(userCreateEditDto.getUsername())) {
+            log.warn("User already exists with username: {}", userCreateEditDto.getUsername());
+            throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+
+        User user = userCreateEditMapper.map(userCreateEditDto);
+        User savedUser = userRepository.save(user);
+
+        log.info("User created successfully with id: {}", savedUser.getId());
+
+        return userReadMapper.map(savedUser);
     }
 
     @Override
     @Transactional
-    public Optional<UserReadDto> update(Long id, UserCreateEditDto userCreateEditDto) {
-        return userRepository.findById(id)
-                .map(entity -> userCreateEditMapper.map(userCreateEditDto, entity))
-                .map(userRepository::saveAndFlush)
-                .map(userReadMapper::map);
+    public UserReadDto update(Long id, UserCreateEditDto userCreateEditDto) {
+        log.info("Updating user with id: {}", id);
+
+        User user = getUserOrThrow(id);
+
+        if (!user.getUsername().equals(userCreateEditDto.getUsername())
+                && userRepository.existsByUsername(userCreateEditDto.getUsername())) {
+            log.warn("Username already taken: {}", userCreateEditDto.getUsername());
+            throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+
+        User updatedUser = userCreateEditMapper.map(userCreateEditDto, user);
+        User savedUser = userRepository.saveAndFlush(updatedUser);
+        log.info("User updated successfully with id: {}", savedUser.getId());
+
+        return userReadMapper.map(savedUser);
     }
 
     @Override
     @Transactional
-    public boolean delete(Long id) {
-        return userRepository.findById(id)
-                .map(entity -> {
-                    userRepository.delete(entity);
-                    userRepository.flush();
-                    return true;
-                })
-                .orElse(false);
+    public void delete(Long id) {
+        log.info("Deleting user with id: {}", id);
+
+        User user = getUserOrThrow(id);
+
+        userRepository.delete(user);
+        userRepository.flush();
+
+        log.info("User deleted successfully with id: {}", id);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("Loading user by username: {}", username);
         return userRepository.findByUsername(username)
-                .map(user -> new User(
+                .map(user -> new org.springframework.security.core.userdetails.User(
                         user.getUsername(),
                         user.getPassword(),
                         Collections.singleton(user.getRole())
                 ))
-                .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
+                .orElseThrow(() -> {
+                    log.warn("User not found with username: {}", username);
+                    return new UsernameNotFoundException("Failed to retrieve user: " + username);
+                });
+    }
+
+    private User getUserOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("User not found with id: {}", id);
+                    return new ApiException(ErrorCode.USER_NOT_FOUND);
+                });
     }
 }

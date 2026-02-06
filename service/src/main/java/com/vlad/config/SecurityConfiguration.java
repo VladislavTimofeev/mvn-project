@@ -19,8 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.vlad.entity.Role.CARRIER;
-import static com.vlad.entity.Role.CUSTOMER;
+import static com.vlad.entity.Role.*;
 
 
 @Configuration
@@ -58,6 +57,9 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/api/**")
+                        .hasAuthority(ADMIN.getAuthority())
+
                         .requestMatchers(HttpMethod.POST, "/api/v2/drivers/**")
                         .hasAuthority(CARRIER.getAuthority())
 

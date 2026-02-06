@@ -5,7 +5,6 @@ import com.vlad.dto.driver.DriverEditDto;
 import com.vlad.dto.driver.DriverReadDto;
 import com.vlad.service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -33,13 +31,10 @@ public class DriverController {
     }
 
     @GetMapping("/{id}")
-    public String findById(@PathVariable("id") Long id, Model model) {
-        return driverService.findById(id)
-                .map(driver -> {
-                    model.addAttribute("driver", driver);
-                    return "driver/driver";
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String findById(@PathVariable Long id, Model model) {
+        DriverReadDto driver = driverService.findById(id);
+        model.addAttribute("driver", driver);
+        return "driver/driver";
     }
 
     @GetMapping("/create")
@@ -49,7 +44,9 @@ public class DriverController {
     }
 
     @PostMapping
-    public String save(@ModelAttribute("driver") DriverCreateDto driverCreateDto, Model model, BindingResult bindingResult) {
+    public String save(@ModelAttribute("driver") DriverCreateDto driverCreateDto,
+                       BindingResult bindingResult,
+                       Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "driver/create";
@@ -59,17 +56,15 @@ public class DriverController {
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable("id") Long id, @ModelAttribute("driver") DriverEditDto driverEditDto) {
-        return driverService.update(id, driverEditDto)
-                .map(it -> "redirect:/drivers/{id}")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String update(@PathVariable Long id,
+                         @ModelAttribute("driver") DriverEditDto driverEditDto) {
+        driverService.update(id, driverEditDto);
+        return "redirect:/drivers/{id}";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
-        if (!driverService.delete(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    public String delete(@PathVariable Long id) {
+        driverService.delete(id);
         return "redirect:/drivers";
     }
 }

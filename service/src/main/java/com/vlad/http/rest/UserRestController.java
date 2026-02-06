@@ -4,8 +4,6 @@ import com.vlad.dto.PageResponse;
 import com.vlad.dto.filter.UserFilterDto;
 import com.vlad.dto.user.UserCreateEditDto;
 import com.vlad.dto.user.UserReadDto;
-import com.vlad.exception.api.ApiException;
-import com.vlad.exception.error.ErrorCode;
 import com.vlad.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +33,7 @@ public class UserRestController {
 
     @GetMapping("/{id}")
     public UserReadDto findById(@PathVariable Long id) {
-        return userService.findById(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND));
+        return userService.findById(id);
     }
 
     @PostMapping
@@ -46,16 +43,14 @@ public class UserRestController {
     }
 
     @PutMapping("/{id}")
-    public UserReadDto update(@PathVariable Long id, @Valid @RequestBody UserCreateEditDto user) {
-        return userService.update(id, user)
-                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND));
+    public UserReadDto update(@PathVariable Long id,
+                              @Valid @RequestBody UserCreateEditDto user) {
+        return userService.update(id, user);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        if (!userService.delete(id)) {
-            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND);
-        }
+        userService.delete(id);
     }
 }

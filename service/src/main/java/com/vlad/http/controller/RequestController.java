@@ -9,7 +9,6 @@ import com.vlad.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 
 @Controller
@@ -37,14 +35,11 @@ public class RequestController {
     }
 
     @GetMapping("/{id}")
-    public String findById(@PathVariable("id") Long id, Model model) {
-        return requestService.findById(id)
-                .map(request -> {
-                    model.addAttribute("request", request);
-                    model.addAttribute("status", RequestStatus.values());
-                    return "request/request";
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String findById(@PathVariable Long id, Model model) {
+        RequestReadDto request = requestService.findById(id);
+        model.addAttribute("request", request);
+        model.addAttribute("status", RequestStatus.values());
+        return "request/request";
     }
 
     @GetMapping("/create")
@@ -55,8 +50,8 @@ public class RequestController {
 
     @PostMapping
     public String save(@ModelAttribute("request") RequestCreateEditDto requestCreateEditDto,
-                       Model model,
-                       BindingResult bindingResult) {
+                       BindingResult bindingResult,
+                       Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "request/create";
@@ -66,17 +61,15 @@ public class RequestController {
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable("id") Long id, @ModelAttribute("request") RequestCreateEditDto requestCreateEditDto) {
-        return requestService.update(id, requestCreateEditDto)
-                .map(it -> "redirect:/requests/{id}")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public String update(@PathVariable Long id,
+                         @ModelAttribute("request") RequestCreateEditDto requestCreateEditDto) {
+        requestService.update(id, requestCreateEditDto);
+        return "redirect:/requests/{id}";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
-        if (!requestService.delete(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    public String delete(@PathVariable Long id) {
+        requestService.delete(id);
         return "redirect:/requests";
     }
 }

@@ -8,4 +8,5 @@ public interface VehicleRepository extends
         JpaRepository<Vehicle, Long>,
         FilterVehicleRepository,
         QuerydslPredicateExecutor<Vehicle> {
+    boolean existsByLicensePlate(String licensePlate);
 }
