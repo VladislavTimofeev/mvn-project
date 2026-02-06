@@ -3,3 +3,7 @@ databaseChangeLog:
       file: db/changelog/db.changelog-1.0.sql
   - include:
       file: db/changelog/db.changelog-1.1-audit.sql
+  - include:
+      file: db/changelog/db.changelog-2.0-add-email-verify.sql
+  - include:
+      file: db/changelog/db.changelog-2.1-add-timestamps.sql

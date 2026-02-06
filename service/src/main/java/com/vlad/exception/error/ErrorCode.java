@@ -8,6 +8,12 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address not verified. Please check your inbox for verification link."),
+    EMAIL_ALREADY_VERIFIED(HttpStatus.CONFLICT, "Email address already verified."),
+    INVALID_VERIFICATION_TOKEN(HttpStatus.NOT_FOUND, "Invalid verification token."),
+    VERIFICATION_TOKEN_EXPIRED(HttpStatus.GONE, "Verification token has expired. Please request a new one."),
+    TOKEN_ALREADY_USED(HttpStatus.CONFLICT, "Verification token has already been used."),
+
     RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "Too many login attempts. Please try again later."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Validation failed"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "Requested resource not found"),

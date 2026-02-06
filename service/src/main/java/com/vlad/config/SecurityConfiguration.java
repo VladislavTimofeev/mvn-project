@@ -45,6 +45,19 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(1)
+    public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/api/v2/auth/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain restSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         return http
                 .securityMatcher("/api/**")
@@ -52,13 +65,10 @@ public class SecurityConfiguration {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v2/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/api/**")
-                        .hasAuthority(ADMIN.getAuthority())
 
                         .requestMatchers(HttpMethod.POST, "/api/v2/drivers/**")
                         .hasAuthority(CARRIER.getAuthority())
@@ -71,6 +81,9 @@ public class SecurityConfiguration {
 
                         .requestMatchers(HttpMethod.POST, "/api/v2/requests/**")
                         .hasAuthority(CUSTOMER.getAuthority())
+
+                        .requestMatchers("/api/**")
+                        .hasAuthority(ADMIN.getAuthority())
 
                         .anyRequest().authenticated()
                 )
@@ -96,7 +109,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain mvcSecurityfilterChain(HttpSecurity http) throws Exception {
         return http
 //                .csrf(AbstractHttpConfigurer::disable)
