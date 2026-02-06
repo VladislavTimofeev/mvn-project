@@ -17,6 +17,12 @@ public class ApiException extends RuntimeException {
         this.details = null;
     }
 
+    public ApiException(ErrorCode errorCode, String customMessage) {
+        super(customMessage);
+        this.errorCode = errorCode;
+        this.details = null;
+    }
+
     public ApiException(ErrorCode errorCode, Map<String, Object> details) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
@@ -27,6 +33,12 @@ public class ApiException extends RuntimeException {
         super(errorCode.getMessage(), cause);
         this.errorCode = errorCode;
         this.details = null;
+    }
+
+    public ApiException(ErrorCode errorCode, String customMessage, Map<String, Object> details) {
+        super(customMessage);
+        this.errorCode = errorCode;
+        this.details = details;
     }
 
     public ApiException(ErrorCode errorCode, Map<String, Object> details, Throwable cause) {

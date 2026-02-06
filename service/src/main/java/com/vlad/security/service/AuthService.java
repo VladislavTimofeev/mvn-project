@@ -4,9 +4,11 @@ import com.vlad.entity.Role;
 import com.vlad.entity.User;
 import com.vlad.exception.api.ApiException;
 import com.vlad.exception.error.ErrorCode;
+import com.vlad.exception.ex.RateLimitExceededException;
 import com.vlad.repository.UserRepository;
 import com.vlad.security.auth.*;
 import com.vlad.security.jwt.JwtTokenProvider;
+import com.vlad.service.RateLimitService;
 import com.vlad.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,69 +32,40 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final RateLimitService rateLimitService;
+
     private static final String BEARER = "Bearer";
 
     @Transactional
     public AuthResponseDto register(RegisterRequestDto request) {
         log.info("Registration attempt for email: {}", request.getUsername());
 
-        if (userRepository.existsByUsername(request.getUsername())) {
-            log.warn("Registration failed: email {} already exists", request.getUsername());
-            throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
-        }
+        validateUserNotExists(request.getUsername());
 
-        User user = User.builder()
-                .name(request.getName())
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .contactInfo(request.getContactInfo())
-                .address(request.getAddress())
-                .role(Role.GUEST)
-                .build();
-
+        User user = createUser(request);
         userRepository.save(user);
+
         log.info("User registered successfully: {}", user.getUsername());
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getUsername(),
-                request.getPassword()
-        );
-
-        String accessToken = jwtTokenProvider.generateToken(authentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-
-        return AuthResponseDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType(BEARER)
-                .expiresIn(jwtTokenProvider.getExpirationTime())
-                .build();
+        return generateAuthResponse(user.getUsername(), request.getPassword());
     }
 
     public AuthResponseDto login(AuthRequestDto request) {
-        log.info("Login attempt for user: {}", request.getUsername());
+        String username = request.getUsername();
+
+        log.info("Login attempt for user: {}", username);
+
+        checkRateLimitBlock(username);
 
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
-            );
-            log.info("User '{}' logged in successfully", request.getUsername());
+            Authentication authentication = authenticateUser(username, request.getPassword());
+            rateLimitService.resetAttempts(username);
 
-            String accessToken = jwtTokenProvider.generateToken(authentication);
-            String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+            log.info("User '{}' logged in successfully", username);
 
-            return AuthResponseDto.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .tokenType(BEARER)
-                    .expiresIn(jwtTokenProvider.getExpirationTime())
-                    .build();
-
+            return generateAuthResponse(authentication);
         } catch (BadCredentialsException e) {
-            log.warn("Failed login attempt for user: {}", request.getUsername());
+            handleFailedLoginAttempt(username);
             throw new ApiException(ErrorCode.INVALID_CREDENTIALS);
         }
     }
@@ -100,7 +73,82 @@ public class AuthService {
     public void logout(LogoutRequestDto request) {
         String accessToken = request.getAccessToken();
         String refreshToken = request.getRefreshToken();
+        validateAndBlacklistTokens(accessToken, refreshToken);
+    }
 
+    public AuthResponseDto refreshToken(RefreshTokenRequestDto request) {
+        String refreshToken = request.getRefreshToken();
+
+        log.info("Refresh token request received");
+
+        validateRefreshToken(refreshToken);
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+        String newAccessToken = jwtTokenProvider.generateTokenFromUsername(username);
+
+        log.info("Access token refreshed for user: {}", username);
+
+        return buildAuthResponse(newAccessToken, refreshToken);
+    }
+
+    private void validateUserNotExists(String username) {
+        if (userRepository.existsByUsername(username)) {
+            log.warn("Registration failed: email {} already exists", username);
+            throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+    }
+
+    private User createUser(RegisterRequestDto request) {
+        return User.builder()
+                .name(request.getName())
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .contactInfo(request.getContactInfo())
+                .address(request.getAddress())
+                .role(Role.GUEST)
+                .build();
+    }
+
+    private void checkRateLimitBlock(String username) {
+        if (rateLimitService.isBlocked(username)) {
+            long blockTimeRemaining = rateLimitService.getBlockTimeRemaining(username);
+            log.warn("Login blocked for user: {}. Time remaining: {} seconds", username, blockTimeRemaining);
+            throw createRateLimitException(blockTimeRemaining, "Please try again in");
+        }
+    }
+
+    private Authentication authenticateUser(String username, String password) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+    }
+
+    private void handleFailedLoginAttempt(String username) {
+        int remainingAttempts = rateLimitService.recordFailedAttempt(username);
+
+        if (remainingAttempts == -1) {
+            long blockTimeRemaining = rateLimitService.getBlockTimeRemaining(username);
+            log.warn("Rate limit exceeded for user: {}. Blocked for {} seconds", username, blockTimeRemaining);
+            throw createRateLimitException(blockTimeRemaining, "Account locked for");
+        }
+
+        log.warn("Failed login attempt for user: {}. Remaining attempts: {}", username, remainingAttempts);
+
+        throw new ApiException(
+                ErrorCode.INVALID_CREDENTIALS,
+                String.format("Invalid username or password. %d attempt(s) remaining before account lock.",
+                        remainingAttempts)
+        );
+    }
+
+    private RateLimitExceededException createRateLimitException(long blockTimeSeconds, String messagePrefix) {
+        long minutesRemaining = Math.max(1, blockTimeSeconds / 60);
+        String message = String.format("Too many failed login attempts. %s %d minute(s).",
+                messagePrefix, minutesRemaining);
+        return new RateLimitExceededException(message, blockTimeSeconds);
+    }
+
+    private void validateAndBlacklistTokens(String accessToken, String refreshToken) {
         try {
             if (!jwtTokenProvider.validateToken(accessToken)) {
                 throw new ApiException(ErrorCode.INVALID_TOKEN);
@@ -118,11 +166,7 @@ public class AuthService {
         }
     }
 
-    public AuthResponseDto refreshToken(RefreshTokenRequestDto request) {
-        String refreshToken = request.getRefreshToken();
-
-        log.info("Refresh token request received");
-
+    private void validateRefreshToken(String refreshToken) {
         if (tokenBlacklistService.isBlacklisted(refreshToken)) {
             log.warn("Attempted to refresh using blacklisted token");
             throw new ApiException(ErrorCode.INVALID_TOKEN);
@@ -132,15 +176,22 @@ public class AuthService {
             log.warn("Invalid refresh token");
             throw new ApiException(ErrorCode.INVALID_TOKEN);
         }
+    }
 
-        String username = jwtTokenProvider.getUsername(refreshToken);
-        var userDetails = userDetailsService.loadUserByUsername(username);
-        String newAccessToken = jwtTokenProvider.generateTokenFromUsername(userDetails.getUsername());
+    private AuthResponseDto generateAuthResponse(String username, String password) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+        return generateAuthResponse(authentication);
+    }
 
-        log.info("Access token refreshed for user: {}", username);
+    private AuthResponseDto generateAuthResponse(Authentication authentication) {
+        String accessToken = jwtTokenProvider.generateToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+        return buildAuthResponse(accessToken, refreshToken);
+    }
 
+    private AuthResponseDto buildAuthResponse(String accessToken, String refreshToken) {
         return AuthResponseDto.builder()
-                .accessToken(newAccessToken)
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType(BEARER)
                 .expiresIn(jwtTokenProvider.getExpirationTime())

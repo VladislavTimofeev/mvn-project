@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "Too many login attempts. Please try again later."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Validation failed"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "Requested resource not found"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
