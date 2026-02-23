@@ -48,14 +48,9 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public VerifyEmailResponseDto verifyEmail(@RequestParam String token) {
-        emailVerificationService.verifyEmail(token);
-        String email = emailVerificationService.getEmailByToken(token);
-        return VerifyEmailResponseDto.builder()
-                .message("Email verified successfully! You can now login.")
-                .verified(true)
-                .email(email)
-                .build();
+    public ResponseEntity<VerifyEmailResponseDto> verifyEmail(@RequestParam String token) {
+        VerifyEmailResponseDto response = emailVerificationService.verifyEmailWithDetails(token);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/resend-verification")

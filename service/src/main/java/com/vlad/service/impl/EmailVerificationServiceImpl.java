@@ -6,6 +6,7 @@ import com.vlad.exception.api.ApiException;
 import com.vlad.exception.error.ErrorCode;
 import com.vlad.repository.EmailVerificationTokenRepository;
 import com.vlad.repository.UserRepository;
+import com.vlad.security.auth.VerifyEmailResponseDto;
 import com.vlad.service.EmailService;
 import com.vlad.service.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,25 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Value("${app.verification.token-expiration-hours}")
     private int tokenExpirationHours;
+
+    @Override
+    @Transactional
+    public VerifyEmailResponseDto verifyEmailWithDetails(String token) {
+        EmailVerificationToken verificationToken = findAndValidateToken(token);
+
+        markTokenAsUsed(verificationToken);
+        markUserAsVerified(verificationToken.getUser());
+
+        String email = verificationToken.getUser().getUsername();
+
+        log.info("Email verified successfully for user: {}", email);
+
+        return VerifyEmailResponseDto.builder()
+                .message("Email verified successfully! You can now login.")
+                .verified(true)
+                .email(email)
+                .build();
+    }
 
     @Override
     public void createAndSendVerificationToken(User user) {
