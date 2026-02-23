@@ -22,6 +22,58 @@ public class RateLimitServiceImpl implements RateLimitService {
     private static final String BLOCK = "block:";
     private static final String ATTEMPTS = "attempts:";
 
+    private static final int MAX_PASSWORD_RESET_ATTEMPTS = 3;
+    private static final int PASSWORD_RESET_WINDOW_HOURS = 1;
+    private static final String PASSWORD_RESET_ATTEMPTS_PREFIX = "password_reset_attempts:";
+
+
+    @Override
+    public boolean isPasswordResetBlocked(String email) {
+        String key = PASSWORD_RESET_ATTEMPTS_PREFIX + email;
+        String attempts = redisTemplate.opsForValue().get(key);
+
+        if (attempts == null) {
+            return false;
+        }
+
+        int attemptCount = Integer.parseInt(attempts);
+        boolean isBlocked = attemptCount >= MAX_PASSWORD_RESET_ATTEMPTS;
+
+        if (isBlocked) {
+            Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+            log.warn("Password reset blocked for email: {}. Time remaining: {} seconds", email, ttl);
+        }
+        return isBlocked;
+    }
+
+    @Override
+    public int recordPasswordResetAttempt(String email) {
+        String key = PASSWORD_RESET_ATTEMPTS_PREFIX + email;
+        Long attempts = redisTemplate.opsForValue().increment(key);
+
+        if (attempts == null) {
+            attempts = 1L;
+        }
+
+        if (attempts == 1) {
+            redisTemplate.expire(key, Duration.ofHours(PASSWORD_RESET_WINDOW_HOURS));
+        }
+
+        log.debug("Password reset attempt {} for email: {}", attempts, email);
+
+        if (attempts >= MAX_PASSWORD_RESET_ATTEMPTS) {
+            log.warn("Max password reset attempts reached for email: {}", email);
+            return -1;
+        }
+        return MAX_PASSWORD_RESET_ATTEMPTS - attempts.intValue();
+    }
+
+    @Override
+    public long getPasswordResetBlockTimeRemaining(String email) {
+        String key = PASSWORD_RESET_ATTEMPTS_PREFIX + email;
+        Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return ttl != null ? ttl : 0;
+    }
 
     @Override
     public boolean isBlocked(String key) {

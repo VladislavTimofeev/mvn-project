@@ -59,3 +59,5 @@ app:
     base-url: http://localhost:8080
     from-email: noreply@logistics.com
     from-name: Logistics Management System
+  password-reset:
+    token-expiration-hours: 1

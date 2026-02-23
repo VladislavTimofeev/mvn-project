@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    INVALID_RESET_TOKEN(HttpStatus.BAD_REQUEST, "Invalid password reset token"),
+    RESET_TOKEN_EXPIRED(HttpStatus.GONE, "Password reset token has expired. Please request a new one"),
+    RESET_TOKEN_ALREADY_USED(HttpStatus.CONFLICT, "Password reset token has already been used"),
+
     EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address not verified. Please check your inbox for verification link."),
     EMAIL_ALREADY_VERIFIED(HttpStatus.CONFLICT, "Email address already verified."),
     INVALID_VERIFICATION_TOKEN(HttpStatus.NOT_FOUND, "Invalid verification token."),

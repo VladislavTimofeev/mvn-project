@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-2.0-add-email-verify.sql
   - include:
       file: db/changelog/db.changelog-2.1-add-timestamps.sql
+  - include:
+      file: db/changelog/db.changelog-2.2-add-password-reset-tokens.sql

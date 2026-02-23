@@ -14,6 +14,9 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
 
     Optional<EmailVerificationToken> findByToken(String token);
 
+    @Query("SELECT t FROM EmailVerificationToken t JOIN FETCH t.user WHERE t.token = :token")
+    Optional<EmailVerificationToken> findByTokenWithUser(@Param("token") String token);
+
     Optional<EmailVerificationToken> findByUserAndUsedFalse(User user);
 
     @Modifying

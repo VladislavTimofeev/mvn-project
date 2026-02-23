@@ -63,6 +63,13 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         log.info("Verification email resent to: {}", email);
     }
 
+    @Override
+    public String getEmailByToken(String token) {
+        return tokenRepository.findByTokenWithUser(token)
+                .map(verificationToken -> verificationToken.getUser().getUsername())
+                .orElse(null);
+    }
+
     private void deleteExistingTokens(User user) {
         tokenRepository.deleteByUser(user);
     }
