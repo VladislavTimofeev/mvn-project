@@ -35,6 +35,8 @@ public class EmailServiceImpl implements EmailService {
 
     private static final String VERIFICATION_SUBJECT = "Verify Your Email Address";
     private static final String VERIFICATION_TEMPLATE = "email/verification";
+    private static final String PASSWORD_RESET_SUBJECT = "Reset Your Password";
+    private static final String PASSWORD_RESET_TEMPLATE = "email/password-reset";
 
     @Override
     public void sendVerificationEmail(String to, String userName, String verificationToken) {
@@ -57,8 +59,21 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPasswordResetEmail(String to, String userName, String resetToken) {
-        // TODO: Implement for Password Reset feature
-        log.info("Password reset email would be sent to: {}", to);
+        try {
+            String resetUrl = baseUrl + "/api/v2/auth/reset-password?token=" + resetToken;
+
+            Context context = new Context();
+            context.setVariable("userName", userName);
+            context.setVariable("resetUrl", resetUrl);
+
+            String htmlContent = templateEngine.process(PASSWORD_RESET_TEMPLATE, context);
+
+            sendHtmlEmail(to, PASSWORD_RESET_SUBJECT, htmlContent);
+            log.info("Password reset email sent to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to: {}", to, e);
+            throw new EmailSendException("Failed to send password reset email to: " + to, e);
+        }
     }
 
     private void sendHtmlEmail(String to, String subject, String htmlContent)
